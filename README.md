@@ -24,4 +24,10 @@ npm run format  # Format code with prettier
 
 ## Deploy with Railway
 
-npm run deploy  # Deploys to Railway platform
+Create a project and service in [Railway](https://railway.com/) and link it to this project.
+```
+railway link
+npm run deploy 
+```
+
+Alternately, link the service to the Github repo for `main` to be automatically deployed.
