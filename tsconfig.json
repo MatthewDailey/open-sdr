@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "types": ["vitest/globals"],
+    "lib": ["ESNext", "DOM"],
+    "target": "ESNext",
+    "module": "ESNext",
+    "allowJs": true,
+    "moduleResolution": "bundler",
+    "verbatimModuleSyntax": true,
+    "outDir": "./dist",
+    "jsx": "react-jsx",
+
+    "strict": true,
+    "skipLibCheck": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noPropertyAccessFromIndexSignature": false
+  }
+}
