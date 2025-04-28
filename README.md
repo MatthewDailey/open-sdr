@@ -22,6 +22,10 @@ npm run check   # TypeScript checks
 npm run format  # Format code with prettier
 ```
 
+## Deploy with Render 
+
+Create a project and connect the Github repo on [Render](https://render.com/)
+
 ## Deploy with Railway
 
 Create a project and service in [Railway](https://railway.com/) and link it to this project.
