@@ -8,6 +8,9 @@ import { createServer as createViteServer } from 'vite'
 import { doAgentLoop } from '../command/agent'
 import { SDR } from '../command/linkedin'
 import { startClientAndGetTools } from '../command/mcp'
+import fs from 'fs'
+import yaml from 'js-yaml'
+import path from 'path'
 
 export async function createApp() {
   const app = express()
@@ -27,6 +30,18 @@ export async function createApp() {
   app.get('/api/ping', (req, res) => {
     console.log('Received ping.')
     return res.send('pong')
+  })
+
+  app.get('/api/workflows', (req, res) => {
+    try {
+      const workflowsPath = path.resolve(process.cwd(), 'workflows.yml')
+      const fileContents = fs.readFileSync(workflowsPath, 'utf8')
+      const workflows = yaml.load(fileContents)
+      return res.json(workflows)
+    } catch (error) {
+      console.error('Error reading workflows:', error)
+      return res.status(500).json({ error: 'Failed to read workflows file' })
+    }
   })
 
   app.all('/api/mcp', async (req, res) => {
