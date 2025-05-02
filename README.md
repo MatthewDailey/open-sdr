@@ -49,16 +49,3 @@ The application integrates with various MCP-compatible tools:
 - Apify for web scraping
 - Rime for text-to-speech
 
-## Deploy with Render 
-
-Create a project and connect the Github repo on [Render](https://render.com/)
-
-## Deploy with Railway
-
-Create a project and service in [Railway](https://railway.com/) and link it to this project.
-```
-railway link
-npm run deploy 
-```
-
-Alternately, link the service to the Github repo for `main` to be automatically deployed.
