@@ -7,6 +7,7 @@ import cors from 'cors'
 import { createServer as createViteServer } from 'vite'
 import { doAgentLoop } from '../command/agent'
 import { SDR } from '../command/linkedin'
+import { startClientAndGetTools } from '../command/mcp'
 
 export async function createApp() {
   const app = express()
@@ -39,7 +40,7 @@ export async function createApp() {
   })
 
   // Chat endpoint with SSE for streaming responses
-  app.get('/api/chat', (req, res) => {
+  app.get('/api/chat', async (req, res) => {
     const prompt = req.query.prompt as string
 
     if (!prompt) {
@@ -61,7 +62,13 @@ export async function createApp() {
     // Tool tracking
     const toolCalls = new Map<string, any>()
 
-    // Run the agent loop
+    sendEvent('message', {
+      type: 'text',
+      content: '⚒️ Setting up tools...',
+    })
+
+    const { tools } = await startClientAndGetTools()
+
     doAgentLoop(
       prompt,
       // onStep callback - handle tool calls and results
@@ -112,6 +119,7 @@ export async function createApp() {
           content: chunk,
         })
       },
+      tools,
     )
       .then(() => {
         // Send done event when complete
