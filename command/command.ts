@@ -7,6 +7,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import { SDR } from './linkedin'
 import { doAgentLoop } from './agent'
+import { startClientAndGetTools } from './mcp'
 import chalk from 'chalk'
 
 yargs(hideBin(process.argv))
@@ -30,6 +31,11 @@ yargs(hideBin(process.argv))
     async (argv) => {
       const prompt = argv.prompt as string
 
+      // Load MCP tools before starting the agent loop
+      console.log('Loading MCP tools...')
+      const { tools } = await startClientAndGetTools()
+      console.log('MCP tools loaded successfully.')
+
       await doAgentLoop(
         prompt,
         (step) => {
@@ -52,6 +58,7 @@ yargs(hideBin(process.argv))
           // Stream text to console in green
           process.stdout.write(chalk.green(chunk))
         },
+        tools, // Pass the MCP tools to the agent loop
       )
       console.log('\n') // Add a newline after completion
     },
