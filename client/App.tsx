@@ -492,7 +492,7 @@ User provided input: ${prompt}`
                     case 'text':
                       return (
                         <div key={index} className={`text-response ${chunk.type}`}>
-                          {chunk.content}
+                          <ReactMarkdown>{chunk.content}</ReactMarkdown>
                         </div>
                       )
                     // case 'tool_call':
