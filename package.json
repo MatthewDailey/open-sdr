@@ -1,10 +1,10 @@
 {
-  "name": "web-starter",
+  "name": "open-sdr",
   "type": "module",
   "scripts": {
     "build": "vite build",
     "start": "NODE_ENV=production tsx server/index.ts",
-    "dev": "tsx watch server/index.ts",
+    "dev": "concurrently \"vite\" \"tsx watch server/index.ts\"",
     "cli": "tsx command/command.ts",
     "deploy": "railway up",
     "test": "vitest",
@@ -23,6 +23,8 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-markdown": "^10.1.0",
+    "styled-jsx": "^5.1.2",
+    "@babel/core": "^7.23.7",
     "typescript": "^5.7.2",
     "vitest": "^3.0.9",
     "yarg": "^1.0.7",
