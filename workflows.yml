@@ -2,10 +2,9 @@ Find Connections:
   description: Find connections at companies matching brief.
   input: Brief describing the type of company to search for.
   steps:
-    - Search the web and collect a bunch of pages that might contain relevant companies. Always get citations for your searches.
+    - Search the web and collect pages that might contain relevant companies. Always get citations for your searches.
     - Read those pages to get first hand and collate a list of companies to look at.
     - Find people I know who work at those companies. If no first connections are available, find second degree connections.
-    - Save the results to the Leads database in Notion.
 
 Gather Background:
   description: Gather background on a company.

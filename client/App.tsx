@@ -15,6 +15,17 @@ interface ChatState {
   error?: string
 }
 
+// Types for workflows
+interface Workflow {
+  description: string
+  input: string
+  steps: string[]
+}
+
+interface WorkflowsState {
+  [key: string]: Workflow
+}
+
 function App() {
   const [prompt, setPrompt] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -23,10 +34,48 @@ function App() {
     toolCalls: [],
     isComplete: false,
   })
+  const [workflows, setWorkflows] = useState<WorkflowsState>({})
+  const [selectedWorkflow, setSelectedWorkflow] = useState<string>('')
+  console.log('selectedWorkflow', selectedWorkflow)
+  const [isLoadingWorkflows, setIsLoadingWorkflows] = useState(true)
+  const [workflowError, setWorkflowError] = useState('')
+
+  // Fetch workflows on component mount
+  useEffect(() => {
+    fetchWorkflows()
+  }, [])
+
+  const fetchWorkflows = async () => {
+    setIsLoadingWorkflows(true)
+    setWorkflowError('')
+
+    try {
+      const response = await fetch('/api/workflows')
+      if (!response.ok) {
+        throw new Error(`Failed to fetch workflows: ${response.statusText}`)
+      }
+      const data = await response.json()
+      setWorkflows(data)
+    } catch (error) {
+      console.error('Error fetching workflows:', error)
+      setWorkflowError('Failed to load workflows. Please try again.')
+    } finally {
+      setIsLoadingWorkflows(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!prompt.trim() || isLoading) return
+    if (!prompt.trim() || isLoading || !selectedWorkflow) return
+
+    // Prepare the message with workflow context
+    const fullPrompt = `Using the "${selectedWorkflow}" workflow:
+Description: ${workflows[selectedWorkflow]?.description}
+Input: ${workflows[selectedWorkflow]?.input}
+Steps:
+${workflows[selectedWorkflow]?.steps.map((step, index) => `${index + 1}. ${step}`).join('\n')}
+
+${prompt}`
 
     setIsLoading(true)
     setResponse({
@@ -36,7 +85,7 @@ function App() {
     })
 
     try {
-      const eventSource = new EventSource(`/api/chat?prompt=${encodeURIComponent(prompt)}`)
+      const eventSource = new EventSource(`/api/chat?prompt=${encodeURIComponent(fullPrompt)}`)
 
       eventSource.onmessage = (event) => {
         const data = JSON.parse(event.data)
@@ -101,41 +150,99 @@ function App() {
     )
   }
 
+  // Render workflow selection or the chat interface based on selection state
   return (
     <div className="app">
       <div className="container">
-        {/* Input section */}
-        <form onSubmit={handleSubmit}>
-          <textarea
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Ask anything..."
-            disabled={isLoading}
-            rows={4}
-          />
-          <button type="submit" disabled={isLoading || !prompt.trim()}>
-            {isLoading ? 'Processing...' : 'Send'}
-          </button>
-        </form>
+        {/* Workflow Selection */}
+        {!selectedWorkflow && (
+          <div className="workflow-selection">
+            <h2>Select a Workflow</h2>
 
-        {/* Response section */}
-        <div className="response-area">
-          {response.error && <div className="error">{response.error}</div>}
+            {isLoadingWorkflows && <div className="loading">Loading workflows...</div>}
 
-          {/* Text response */}
-          {response.text && (
-            <div className="text-response">
-              <ReactMarkdown>{response.text}</ReactMarkdown>
+            {workflowError && <div className="error">{workflowError}</div>}
+
+            {!isLoadingWorkflows && !workflowError && Object.keys(workflows).length === 0 && (
+              <div className="error">No workflows available.</div>
+            )}
+
+            {!isLoadingWorkflows && Object.keys(workflows).length > 0 && (
+              <div className="workflow-list">
+                {Object.entries(workflows).map(([name, workflow]) => (
+                  <div
+                    key={name}
+                    className="workflow-item"
+                    onClick={() => setSelectedWorkflow(name)}
+                  >
+                    <h3>{name}</h3>
+                    <p>{workflow.description}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Chat Interface */}
+        {selectedWorkflow && (
+          <>
+            <div className="selected-workflow">
+              <h2>{selectedWorkflow}</h2>
+              <p>{workflows[selectedWorkflow]?.description}</p>
+              <button
+                className="back-button"
+                onClick={() => {
+                  setSelectedWorkflow('')
+                  setPrompt('')
+                  setResponse({
+                    text: '',
+                    toolCalls: [],
+                    isComplete: false,
+                  })
+                }}
+              >
+                ← Back to workflows
+              </button>
             </div>
-          )}
 
-          {/* Tool results */}
-          {response.toolCalls.map((toolCall, index) => (
-            <div key={index}>{renderToolResult(toolCall)}</div>
-          ))}
+            <form onSubmit={handleSubmit}>
+              <label htmlFor="prompt">{workflows[selectedWorkflow]?.input}:</label>
+              <textarea
+                id="prompt"
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                placeholder={`Enter ${workflows[selectedWorkflow]?.input.toLowerCase()}...`}
+                disabled={isLoading}
+                rows={4}
+              />
+              <button type="submit" disabled={isLoading || !prompt.trim()}>
+                {isLoading ? 'Processing...' : 'Send'}
+              </button>
+            </form>
 
-          {isLoading && <div className="loading">Processing...</div>}
-        </div>
+            {/* Response section */}
+            {(response.text || response.toolCalls.length > 0 || response.error) && (
+              <div className="response-area">
+                {response.error && <div className="error">{response.error}</div>}
+
+                {/* Text response */}
+                {response.text && (
+                  <div className="text-response">
+                    <ReactMarkdown>{response.text}</ReactMarkdown>
+                  </div>
+                )}
+
+                {/* Tool results */}
+                {response.toolCalls.map((toolCall, index) => (
+                  <div key={index}>{renderToolResult(toolCall)}</div>
+                ))}
+
+                {isLoading && <div className="loading">Processing...</div>}
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       <style>
@@ -183,6 +290,11 @@ function App() {
           button:disabled {
             background: #adb5bd;
             cursor: not-allowed;
+          }
+
+          .back-button {
+            align-self: flex-start;
+            background: #495057;
           }
           
           .response-area {
@@ -233,6 +345,64 @@ function App() {
           .loading {
             color: #868e96;
             font-style: italic;
+            padding: 12px;
+          }
+
+          .workflow-selection {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+          }
+
+          .workflow-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+          }
+
+          .workflow-item {
+            padding: 16px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+          }
+
+          .workflow-item:hover {
+            background: #f1f3f5;
+            border-color: #adb5bd;
+          }
+
+          .workflow-item h3 {
+            margin: 0 0 8px 0;
+            color: #212529;
+          }
+
+          .workflow-item p {
+            margin: 0;
+            color: #495057;
+          }
+
+          .selected-workflow {
+            padding: 16px;
+            background: #e7f5ff;
+            border-radius: 4px;
+            margin-bottom: 16px;
+          }
+
+          .selected-workflow h2 {
+            margin: 0 0 8px 0;
+            color: #1971c2;
+          }
+
+          .selected-workflow p {
+            margin: 0 0 16px 0;
+            color: #495057;
+          }
+
+          label {
+            font-weight: 500;
+            margin-bottom: 4px;
           }
         `}
       </style>
