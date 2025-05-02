@@ -12,9 +12,21 @@ type ToolCall = {
   result?: any
 }
 
+type Chunk =
+  | {
+      type: 'text'
+      content: string
+    }
+  | {
+      type: 'tool_call'
+      content: ToolCall
+    }
+  | {
+      type: 'tool_result'
+      content: ToolCall
+    }
 interface ChatState {
-  text: string
-  toolCalls: ToolCall[]
+  chunks: Chunk[]
   isComplete: boolean
   error?: string
 }
@@ -54,8 +66,7 @@ function App() {
   const [prompt, setPrompt] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [response, setResponse] = useState<ChatState>({
-    text: '',
-    toolCalls: [],
+    chunks: [],
     isComplete: false,
   })
   const [workflows, setWorkflows] = useState<WorkflowsState>({})
@@ -152,8 +163,7 @@ User provided input: ${prompt}`
 
     setIsLoading(true)
     setResponse({
-      text: '',
-      toolCalls: [],
+      chunks: [],
       isComplete: false,
     })
     // Reset expanded tools state
@@ -170,25 +180,17 @@ User provided input: ${prompt}`
             case 'text':
               return {
                 ...prev,
-                text: prev.text + data.content,
+                chunks: [...prev.chunks, { type: 'text', content: data.content }],
               }
             case 'tool_call':
-              const newToolCalls = [...prev.toolCalls, data.toolCall]
-              // Automatically expand only the first tool
-              if (newToolCalls.length === 1) {
-                setExpandedTools({ 0: true })
-              }
               return {
                 ...prev,
-                toolCalls: newToolCalls,
+                chunks: [...prev.chunks, { type: 'tool_call', content: data.toolCall }],
               }
             case 'tool_result':
-              const updatedToolCalls = prev.toolCalls.map((tc, index) =>
-                tc.tool === data.toolCall.tool ? data.toolCall : tc,
-              )
               return {
                 ...prev,
-                toolCalls: updatedToolCalls,
+                chunks: [...prev.chunks, { type: 'tool_result', content: data.toolCall }],
               }
             default:
               return prev
@@ -389,6 +391,29 @@ User provided input: ${prompt}`
     )
   }
 
+  const coallesceText = (chunks: Chunk[]): Chunk[] => {
+    // Combine adjacent text chunks into a single text chunk
+    const result: Chunk[] = []
+
+    for (let i = 0; i < chunks.length; i++) {
+      const currentChunk = chunks[i]
+
+      // If this is a text chunk and the previous chunk was also text, combine them
+      if (
+        currentChunk.type === 'text' &&
+        result.length > 0 &&
+        result[result.length - 1].type === 'text'
+      ) {
+        // Append the current text to the previous text chunk
+        result[result.length - 1].content += currentChunk.content
+      } else {
+        // Otherwise, add the chunk as is
+        result.push({ ...currentChunk })
+      }
+    }
+
+    return result
+  }
   // Render workflow selection or the chat interface based on selection state
   return (
     <Theme>
@@ -436,8 +461,7 @@ User provided input: ${prompt}`
                     setSelectedWorkflow('')
                     setPrompt('')
                     setResponse({
-                      text: '',
-                      toolCalls: [],
+                      chunks: [],
                       isComplete: false,
                     })
                     setValidationResult(null)
@@ -475,24 +499,31 @@ User provided input: ${prompt}`
               </form>
 
               {/* Response section */}
-              {(response.text || response.toolCalls.length > 0 || response.error) && (
+              {(response.chunks.length > 0 || response.error) && (
                 <div className="response-area">
+                  {coallesceText(response.chunks).map((chunk, index) => {
+                    switch (chunk.type) {
+                      case 'text':
+                        return (
+                          <div key={index} className={`text-response ${chunk.type}`}>
+                            {chunk.content}
+                          </div>
+                        )
+                      case 'tool_call':
+                        return (
+                          <div key={index} className={`tool-call-wrapper ${chunk.type}`}>
+                            {renderToolResult(chunk.content, index)}
+                          </div>
+                        )
+                      case 'tool_result':
+                        return (
+                          <div key={index} className={`tool-result ${chunk.type}`}>
+                            {renderToolResult(chunk.content, index)}
+                          </div>
+                        )
+                    }
+                  })}
                   {response.error && <div className="error">{response.error}</div>}
-
-                  {/* Text response */}
-                  {response.text && (
-                    <div className="text-response">
-                      <ReactMarkdown>{response.text}</ReactMarkdown>
-                    </div>
-                  )}
-
-                  {/* Tool results */}
-                  {response.toolCalls.map((toolCall, index) => (
-                    <div key={index} className="tool-call-wrapper">
-                      {renderToolResult(toolCall, index)}
-                    </div>
-                  ))}
-
                   {isLoading && <div className="loading">Processing...</div>}
                 </div>
               )}
