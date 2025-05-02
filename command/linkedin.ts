@@ -178,7 +178,7 @@ export class SDR {
           return {
             content: profiles.map((profile) => ({
               type: 'text',
-              text: `Name: ${profile.name}\nRole: ${profile.role}\nImageURL: ${profile.image}\nProfile Link: ${profile.profileLink}`,
+              text: `LINKEDIN\nName: ${profile.name}\nRole: ${profile.role}\nImageURL: ${profile.image}\nProfile Link: ${profile.profileLink}`,
             })),
           }
         },
