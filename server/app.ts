@@ -11,6 +11,7 @@ import { startClientAndGetTools } from '../command/mcp'
 import fs from 'fs'
 import yaml from 'js-yaml'
 import path from 'path'
+import { validateWorkflow } from './validate_workflow'
 
 export async function createApp() {
   const app = express()
@@ -52,6 +53,27 @@ export async function createApp() {
       transport.close()
       server.close()
     })
+  })
+
+  app.post('/api/validate_workflow', async (req, res) => {
+    try {
+      const workflow = req.body
+
+      if (!workflow) {
+        return res.status(400).json({ error: 'Workflow is required' })
+      }
+
+      const { tools } = await startClientAndGetTools()
+      const validationResult = await validateWorkflow(workflow, tools)
+
+      return res.json(validationResult)
+    } catch (error) {
+      console.error('Error validating workflow:', error)
+      return res.status(500).json({
+        error: 'Failed to validate workflow',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      })
+    }
   })
 
   // Chat endpoint with SSE for streaming responses

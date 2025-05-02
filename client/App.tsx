@@ -26,6 +26,17 @@ interface WorkflowsState {
   [key: string]: Workflow
 }
 
+// Types for workflow validation
+interface Capability {
+  description: string
+  isCapable: boolean
+}
+
+interface ValidationResult {
+  workflowSupported: boolean
+  capabilities?: Capability[]
+}
+
 function App() {
   const [prompt, setPrompt] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -36,9 +47,12 @@ function App() {
   })
   const [workflows, setWorkflows] = useState<WorkflowsState>({})
   const [selectedWorkflow, setSelectedWorkflow] = useState<string>('')
-  console.log('selectedWorkflow', selectedWorkflow)
   const [isLoadingWorkflows, setIsLoadingWorkflows] = useState(true)
   const [workflowError, setWorkflowError] = useState('')
+
+  // Validation states
+  const [isValidating, setIsValidating] = useState(false)
+  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null)
 
   // Fetch workflows on component mount
   useEffect(() => {
@@ -62,6 +76,49 @@ function App() {
     } finally {
       setIsLoadingWorkflows(false)
     }
+  }
+
+  // Validate workflow when selected
+  const validateWorkflow = async (workflowName: string) => {
+    setIsValidating(true)
+    setValidationResult(null)
+
+    try {
+      const workflowToValidate = { [workflowName]: workflows[workflowName] }
+      const response = await fetch('/api/validate_workflow', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(workflowToValidate),
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to validate workflow: ${response.statusText}`)
+      }
+
+      const result = await response.json()
+      setValidationResult(result)
+    } catch (error) {
+      console.error('Error validating workflow:', error)
+      setValidationResult({
+        workflowSupported: false,
+        capabilities: [
+          {
+            description: 'Error validating workflow',
+            isCapable: false,
+          },
+        ],
+      })
+    } finally {
+      setIsValidating(false)
+    }
+  }
+
+  // Handle workflow selection
+  const handleWorkflowSelect = (workflowName: string) => {
+    setSelectedWorkflow(workflowName)
+    validateWorkflow(workflowName)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -150,6 +207,62 @@ User provided input: ${prompt}`
     )
   }
 
+  // Render validation results
+  const renderValidationResults = () => {
+    if (isValidating) {
+      return (
+        <div className="validating">
+          Validating workflow capabilities... <span className="spinner"></span>
+        </div>
+      )
+    }
+
+    if (!validationResult) return null
+
+    return (
+      <div
+        className={`validation-result ${validationResult.workflowSupported ? 'supported' : 'unsupported'}`}
+      >
+        <div className="validation-status">
+          {validationResult.workflowSupported ? (
+            <div className="supported-message">
+              <span className="emoji">✅</span> This workflow is fully supported!
+            </div>
+          ) : (
+            <div className="unsupported-message">
+              <span className="emoji">❌</span> This workflow cannot be completed with current
+              capabilities
+            </div>
+          )}
+        </div>
+
+        {!validationResult.workflowSupported && validationResult.capabilities && (
+          <div className="capabilities-table">
+            <h4>Capability Assessment</h4>
+            <table>
+              <thead>
+                <tr>
+                  <th>Status</th>
+                  <th>Capability</th>
+                </tr>
+              </thead>
+              <tbody>
+                {validationResult.capabilities.map((capability, index) => (
+                  <tr key={index}>
+                    <td className="status-cell">
+                      <span className="emoji">{capability.isCapable ? '✅' : '❌'}</span>
+                    </td>
+                    <td>{capability.description}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    )
+  }
+
   // Render workflow selection or the chat interface based on selection state
   return (
     <div className="app">
@@ -173,7 +286,7 @@ User provided input: ${prompt}`
                   <div
                     key={name}
                     className="workflow-item"
-                    onClick={() => setSelectedWorkflow(name)}
+                    onClick={() => handleWorkflowSelect(name)}
                   >
                     <h3>{name}</h3>
                     <p>{workflow.description}</p>
@@ -200,11 +313,14 @@ User provided input: ${prompt}`
                     toolCalls: [],
                     isComplete: false,
                   })
+                  setValidationResult(null)
                 }}
               >
                 ← Back to workflows
               </button>
             </div>
+
+            {renderValidationResults()}
 
             <form onSubmit={handleSubmit}>
               <label htmlFor="prompt">{workflows[selectedWorkflow]?.input}:</label>
@@ -213,10 +329,19 @@ User provided input: ${prompt}`
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 placeholder={`Enter ${workflows[selectedWorkflow]?.input.toLowerCase()}...`}
-                disabled={isLoading}
+                disabled={
+                  isLoading || (validationResult !== null && !validationResult.workflowSupported)
+                }
                 rows={4}
               />
-              <button type="submit" disabled={isLoading || !prompt.trim()}>
+              <button
+                type="submit"
+                disabled={
+                  isLoading ||
+                  !prompt.trim() ||
+                  (validationResult !== null && !validationResult.workflowSupported)
+                }
+              >
                 {isLoading ? 'Processing...' : 'Send'}
               </button>
             </form>
@@ -403,6 +528,106 @@ User provided input: ${prompt}`
           label {
             font-weight: 500;
             margin-bottom: 4px;
+          }
+          
+          /* Validation styles */
+          .validation-result {
+            padding: 16px;
+            border-radius: 4px;
+            margin-bottom: 16px;
+            animation: fadeIn 0.3s ease-in;
+          }
+          
+          .validation-result.supported {
+            background: #ebfbee;
+            border: 1px solid #40c057;
+          }
+          
+          .validation-result.unsupported {
+            background: #fff5f5;
+            border: 1px solid #fa5252;
+          }
+          
+          .validation-status {
+            font-weight: 600;
+            font-size: 18px;
+            margin-bottom: 12px;
+          }
+          
+          .supported-message {
+            color: #2b8a3e;
+          }
+          
+          .unsupported-message {
+            color: #e03131;
+          }
+          
+          .capabilities-table {
+            margin-top: 16px;
+          }
+          
+          .capabilities-table h4 {
+            margin: 0 0 12px 0;
+            color: #495057;
+          }
+          
+          .capabilities-table table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #dee2e6;
+            background: white;
+          }
+          
+          .capabilities-table th,
+          .capabilities-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+          }
+          
+          .capabilities-table th {
+            background: #f1f3f5;
+            font-weight: 600;
+            color: #495057;
+          }
+          
+          .status-cell {
+            text-align: center;
+            width: 60px;
+          }
+          
+          .emoji {
+            font-size: 18px;
+          }
+          
+          .validating {
+            padding: 16px;
+            background: #e7f5ff;
+            border-radius: 4px;
+            color: #1c7ed6;
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+          }
+          
+          .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-left: 10px;
+            border: 3px solid rgba(0, 123, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #0077ff;
+            animation: spin 1s ease-in-out infinite;
+          }
+          
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+          
+          @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
           }
         `}
       </style>
