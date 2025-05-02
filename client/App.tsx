@@ -466,10 +466,7 @@ User provided input: ${prompt}`
               <b>{selectedWorkflow}</b>
               <p>{workflows[selectedWorkflow]?.description}</p>
               {validationResult && (
-                <p>
-                  {validationResult.workflowSupported ? '✅' : '❌'}
-                  {validationResult.workflowSupported ? '' : 'Unsupported'}
-                </p>
+                <p>{validationResult.workflowSupported ? '✅' : '❌ Unsupported'}</p>
               )}
             </div>
 

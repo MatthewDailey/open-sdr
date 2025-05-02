@@ -167,7 +167,7 @@ export class SDR {
       })
 
       server.tool(
-        'findConnectionsAt',
+        'findLinkedinConnectionsAt',
         'Find connections at a specific company with specified connection degree with LinkedIn',
         {
           companyName: z.string().describe('The company name to search for'),
