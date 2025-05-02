@@ -82,7 +82,7 @@ export class SDR {
     const networkParam = degree === 'first' ? 'F' : 'S'
 
     const browser = await puppeteer.launch({
-      headless: true,
+      headless: false,
       defaultViewport: null,
       args: ['--start-maximized'],
     })
@@ -119,15 +119,30 @@ export class SDR {
 
       const profiles: Profile[] = await page.evaluate(() => {
         const results: Profile[] = []
-        const profileElements = document.querySelectorAll('li.icyCIEnVdUbGlqkTNIBlFOlbJJcgdHpKqug')
+        const profileElements = document.querySelectorAll('li.deTwLLJFmdvJifHRZrsREabuKckpkYE')
 
         profileElements.forEach((el) => {
-          const name = el.querySelector('span[aria-hidden="true"]')?.textContent?.trim()
-          const role = el.querySelector('.enUeUFdnnuCBZULExEJaiJNEBqKdFsVfs')?.textContent?.trim()
-          const image = el.querySelector('img.presence-entity__image')?.getAttribute('src')
-          const profileLink = el.querySelector('a[href*="linkedin.com/in"]')?.getAttribute('href')
+          // Get the name from the profile, looking for the name element with the specific structure
+          const nameElement = el.querySelector(
+            '.BxdjqmEosQywVSBbjvSsYuWJfSVpXnYNOSlU span[aria-hidden="true"]',
+          )
+          const name = nameElement?.textContent?.trim() ?? ''
 
-          if (name && role && image && profileLink) {
+          // Get the role from the profile role element
+          const role =
+            el.querySelector('.QmHtvHCBOiVUdutUPDZihOIsguJlXpIDOWlyM')?.textContent?.trim() ?? ''
+
+          // Get the image from the presence-entity__image
+          const imageElement = el.querySelector('img.presence-entity__image')
+          const image = imageElement?.getAttribute('src') ?? ''
+
+          // Get the profile link
+          const profileLinkElement = el.querySelector(
+            'a.nuXDIvMbeMYWApPugutCOKmVhZzvTYUM[href*="linkedin.com/in"]',
+          )
+          const profileLink = profileLinkElement?.getAttribute('href') ?? ''
+
+          if (name && profileLink) {
             results.push({
               name,
               role,
