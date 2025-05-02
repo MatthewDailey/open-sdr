@@ -502,7 +502,7 @@ User provided input: ${prompt}`
                   }
                 })}
                 {response.error && <div className="error">{response.error}</div>}
-                {isLoading && <div className="loading">Processing...</div>}
+                {/* {isLoading && <div className="loading">Processing...</div>} */}
               </div>
             )}
           </>
@@ -656,7 +656,6 @@ User provided input: ${prompt}`
           .loading {
             color: #64748b;
             font-style: italic;
-            padding: 12px;
           }
 
           .workflow-selection {
