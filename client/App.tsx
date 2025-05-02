@@ -75,7 +75,7 @@ Input: ${workflows[selectedWorkflow]?.input}
 Steps:
 ${workflows[selectedWorkflow]?.steps.map((step, index) => `${index + 1}. ${step}`).join('\n')}
 
-${prompt}`
+User provided input: ${prompt}`
 
     setIsLoading(true)
     setResponse({
