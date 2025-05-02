@@ -16,6 +16,7 @@
     "@ai-sdk/anthropic": "^1.2.10",
     "@modelcontextprotocol/sdk": "^1.11.0",
     "ai": "^4.3.13",
+    "chalk": "^5.4.1",
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "puppeteer": "^24.8.0",
