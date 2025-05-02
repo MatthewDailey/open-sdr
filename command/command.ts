@@ -19,6 +19,32 @@ yargs(hideBin(process.argv))
     await sdr.login()
   })
   .command(
+    'connections <company>',
+    'Find LinkedIn connections at a specific company',
+    (yargs) => {
+      return yargs
+        .positional('company', {
+          describe: 'The company name to search for',
+          type: 'string',
+          demandOption: true,
+        })
+        .option('degree', {
+          describe: 'Connection degree (first or second)',
+          type: 'string',
+          choices: ['first', 'second'],
+          default: 'first',
+        })
+    },
+    async (argv) => {
+      const company = argv.company as string
+      const degree = argv.degree as 'first' | 'second'
+
+      console.log(`Searching for ${degree} degree connections at ${company}...`)
+      const sdr = new SDR()
+      await sdr.findConnectionsAt(company, degree)
+    },
+  )
+  .command(
     'sdr <prompt>',
     'Run the AI agent with the given prompt',
     (yargs) => {
