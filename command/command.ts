@@ -11,9 +11,6 @@ import { startClientAndGetTools } from './mcp'
 import chalk from 'chalk'
 
 yargs(hideBin(process.argv))
-  .command('hello', 'Say hello', {}, (argv) => {
-    console.log('Hello, world!')
-  })
   .command('login', 'Login to LinkedIn and save cookies', {}, async (argv) => {
     const sdr = new SDR()
     await sdr.login()
