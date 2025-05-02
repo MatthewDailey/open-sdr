@@ -418,133 +418,126 @@ User provided input: ${prompt}`
   return (
     <Theme>
       <div className="app">
-        <div className="container">
-          {/* Workflow Selection */}
-          {!selectedWorkflow && (
-            <div className="workflow-selection">
-              <h2>Select a Workflow</h2>
+        {/* Workflow Selection */}
+        {!selectedWorkflow && (
+          <div className="workflow-selection">
+            <h2 style={{ textAlign: 'center' }}>OpenSDR</h2>
 
-              {isLoadingWorkflows && <div className="loading">Loading workflows...</div>}
+            {isLoadingWorkflows && <div className="loading">Loading workflows...</div>}
 
-              {workflowError && <div className="error">{workflowError}</div>}
+            {workflowError && <div className="error">{workflowError}</div>}
 
-              {!isLoadingWorkflows && !workflowError && Object.keys(workflows).length === 0 && (
-                <div className="error">No workflows available.</div>
-              )}
+            {!isLoadingWorkflows && !workflowError && Object.keys(workflows).length === 0 && (
+              <div className="error">No workflows available.</div>
+            )}
 
-              {!isLoadingWorkflows && Object.keys(workflows).length > 0 && (
-                <div className="workflow-list">
-                  {Object.entries(workflows).map(([name, workflow]) => (
-                    <div
-                      key={name}
-                      className="workflow-item"
-                      onClick={() => handleWorkflowSelect(name)}
-                    >
-                      <h3>{name}</h3>
-                      <p>{workflow.description}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Chat Interface */}
-          {selectedWorkflow && (
-            <>
-              <div className="selected-workflow">
-                <h2>{selectedWorkflow}</h2>
-                <p>{workflows[selectedWorkflow]?.description}</p>
-                <button
-                  className="back-button"
-                  onClick={() => {
-                    setSelectedWorkflow('')
-                    setPrompt('')
-                    setResponse({
-                      chunks: [],
-                      isComplete: false,
-                    })
-                    setValidationResult(null)
-                  }}
-                >
-                  ← Back to workflows
-                </button>
+            {!isLoadingWorkflows && Object.keys(workflows).length > 0 && (
+              <div className="workflow-list">
+                {Object.entries(workflows).map(([name, workflow]) => (
+                  <div
+                    key={name}
+                    className="workflow-item"
+                    onClick={() => handleWorkflowSelect(name)}
+                  >
+                    <h3>{name}</h3>
+                    <p>{workflow.description}</p>
+                  </div>
+                ))}
               </div>
+            )}
+          </div>
+        )}
 
-              {renderValidationResults()}
+        {/* Chat Interface */}
+        {selectedWorkflow && (
+          <>
+            <div className="selected-workflow">
+              <h2>{selectedWorkflow}</h2>
+              <p>{workflows[selectedWorkflow]?.description}</p>
+              <button
+                className="back-button"
+                onClick={() => {
+                  setSelectedWorkflow('')
+                  setPrompt('')
+                  setResponse({
+                    chunks: [],
+                    isComplete: false,
+                  })
+                  setValidationResult(null)
+                }}
+              >
+                ← Back to workflows
+              </button>
+            </div>
 
-              <form onSubmit={handleSubmit}>
-                <label htmlFor="prompt">{workflows[selectedWorkflow]?.input}:</label>
-                <textarea
-                  id="prompt"
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  placeholder={`Enter ${workflows[selectedWorkflow]?.input.toLowerCase()}...`}
-                  disabled={
-                    isLoading || (validationResult !== null && !validationResult.workflowSupported)
+            {renderValidationResults()}
+
+            <form onSubmit={handleSubmit}>
+              <label htmlFor="prompt">{workflows[selectedWorkflow]?.input}:</label>
+              <textarea
+                id="prompt"
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                placeholder={`Enter ${workflows[selectedWorkflow]?.input.toLowerCase()}...`}
+                disabled={
+                  isLoading || (validationResult !== null && !validationResult.workflowSupported)
+                }
+                rows={4}
+              />
+              <button
+                type="submit"
+                className="submit-button"
+                disabled={
+                  isLoading ||
+                  !prompt.trim() ||
+                  (validationResult !== null && !validationResult.workflowSupported)
+                }
+              >
+                {isLoading ? 'Processing...' : 'Send'}
+              </button>
+            </form>
+
+            {/* Response section */}
+            {(response.chunks.length > 0 || response.error) && (
+              <div className="response-area">
+                {coallesceText(response.chunks).map((chunk, index) => {
+                  switch (chunk.type) {
+                    case 'text':
+                      return (
+                        <div key={index} className={`text-response ${chunk.type}`}>
+                          {chunk.content}
+                        </div>
+                      )
+                    case 'tool_call':
+                      return (
+                        <div key={index} className={`tool-call-wrapper ${chunk.type}`}>
+                          {renderToolResult(chunk.content, index)}
+                        </div>
+                      )
+                    case 'tool_result':
+                      return (
+                        <div key={index} className={`tool-result ${chunk.type}`}>
+                          {renderToolResult(chunk.content, index)}
+                        </div>
+                      )
                   }
-                  rows={4}
-                />
-                <button
-                  type="submit"
-                  className="submit-button"
-                  disabled={
-                    isLoading ||
-                    !prompt.trim() ||
-                    (validationResult !== null && !validationResult.workflowSupported)
-                  }
-                >
-                  {isLoading ? 'Processing...' : 'Send'}
-                </button>
-              </form>
+                })}
+                {response.error && <div className="error">{response.error}</div>}
+                {isLoading && <div className="loading">Processing...</div>}
+              </div>
+            )}
+          </>
+        )}
+      </div>
 
-              {/* Response section */}
-              {(response.chunks.length > 0 || response.error) && (
-                <div className="response-area">
-                  {coallesceText(response.chunks).map((chunk, index) => {
-                    switch (chunk.type) {
-                      case 'text':
-                        return (
-                          <div key={index} className={`text-response ${chunk.type}`}>
-                            {chunk.content}
-                          </div>
-                        )
-                      case 'tool_call':
-                        return (
-                          <div key={index} className={`tool-call-wrapper ${chunk.type}`}>
-                            {renderToolResult(chunk.content, index)}
-                          </div>
-                        )
-                      case 'tool_result':
-                        return (
-                          <div key={index} className={`tool-result ${chunk.type}`}>
-                            {renderToolResult(chunk.content, index)}
-                          </div>
-                        )
-                    }
-                  })}
-                  {response.error && <div className="error">{response.error}</div>}
-                  {isLoading && <div className="loading">Processing...</div>}
-                </div>
-              )}
-            </>
-          )}
-        </div>
-
-        <style
-          dangerouslySetInnerHTML={{
-            __html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
           .app {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-          }
-          
-          .container {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
           }
           
           form {
@@ -693,6 +686,9 @@ User provided input: ${prompt}`
             display: flex;
             flex-direction: column;
             gap: 16px;
+            justify-content: center;
+            padding-bottom: 20vh;
+            min-height: 100vh;
           }
 
           .workflow-list {
@@ -928,9 +924,8 @@ User provided input: ${prompt}`
             to { opacity: 1; }
           }
         `,
-          }}
-        />
-      </div>
+        }}
+      />
     </Theme>
   )
 }
