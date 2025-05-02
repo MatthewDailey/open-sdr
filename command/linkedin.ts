@@ -80,7 +80,7 @@ export class SDR {
 
     // Launch a browser
     const browser = await puppeteer.launch({
-      headless: true,
+      headless: false,
       defaultViewport: null,
       args: ['--start-maximized'],
     })
@@ -110,8 +110,8 @@ export class SDR {
       console.log(`Finding ${degree} degree connections at ${companyName}...`)
       console.log(`Navigating to: ${searchUrl}`)
 
-      // Navigate to the search page
-      await page.goto(searchUrl, { waitUntil: 'networkidle2' })
+      await page.goto(searchUrl, { waitUntil: 'load' })
+      await new Promise((resolve) => setTimeout(resolve, 5000))
 
       console.log('Browser open with search results. Close the browser when finished.')
 
