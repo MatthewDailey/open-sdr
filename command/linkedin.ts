@@ -6,6 +6,13 @@ import puppeteer, { type Cookie } from 'puppeteer'
 import fs from 'fs'
 import path from 'path'
 
+export type Profile = {
+  name: string
+  role: string
+  image: string
+  profileLink: string
+}
+
 /**
  * Class for LinkedIn Sales Development Representative automation
  */
@@ -67,13 +74,13 @@ export class SDR {
    * @param companyName Company to search for
    * @param degree Connection degree (first or second)
    */
-  async findConnectionsAt(companyName: string, degree: 'first' | 'second'): Promise<void> {
+  async findConnectionsAt(companyName: string, degree: 'first' | 'second'): Promise<Profile[]> {
     // Network parameter is "F" for first-degree connections, "S" for second-degree
     const networkParam = degree === 'first' ? 'F' : 'S'
 
     // Launch a browser
     const browser = await puppeteer.launch({
-      headless: false,
+      headless: true,
       defaultViewport: null,
       args: ['--start-maximized'],
     })
@@ -94,7 +101,7 @@ export class SDR {
       } else {
         console.error('No cookies found. Please run the login method first.')
         await browser.close()
-        return
+        return []
       }
 
       // Construct the search URL
@@ -106,13 +113,37 @@ export class SDR {
       // Navigate to the search page
       await page.goto(searchUrl, { waitUntil: 'networkidle2' })
 
-      // Keep the browser open for the user to interact with results
       console.log('Browser open with search results. Close the browser when finished.')
 
-      // Wait for the browser to be closed by the user
-      await browser.waitForTarget((target) => target.opener() === null, { timeout: 0 })
+      const profiles: Profile[] = await page.evaluate(() => {
+        const results: Profile[] = []
+        const profileElements = document.querySelectorAll('li.icyCIEnVdUbGlqkTNIBlFOlbJJcgdHpKqug')
+
+        profileElements.forEach((el) => {
+          const name = el.querySelector('span[aria-hidden="true"]')?.textContent?.trim()
+          const role = el.querySelector('.enUeUFdnnuCBZULExEJaiJNEBqKdFsVfs')?.textContent?.trim()
+          const image = el.querySelector('img.presence-entity__image')?.getAttribute('src')
+          const profileLink = el.querySelector('a[href*="linkedin.com/in"]')?.getAttribute('href')
+
+          if (name && role && image && profileLink) {
+            results.push({
+              name,
+              role,
+              image,
+              profileLink,
+            })
+          }
+        })
+
+        return results
+      })
+
+      console.log(profiles)
+
+      return profiles
     } catch (error) {
       console.error(`Error finding connections at ${companyName}:`, error)
+      return []
     } finally {
       if (browser && browser.isConnected()) {
         await browser.close()
