@@ -71,44 +71,33 @@ export async function createApp() {
 
     doAgentLoop(
       prompt,
-      // onStep callback - handle tool calls and results
       (step) => {
-        console.log('Agent step:', step.status)
+        if (step.toolCalls && step.toolCalls.length > 0) {
+          for (let i = 0; i < step.toolCalls.length; i++) {
+            const toolCall = step.toolCalls[i]
+            const toolResult = step.toolResults ? step.toolResults[i] : null
 
-        if (step.status === 'thinking') {
-          sendEvent('message', {
-            type: 'text',
-            content: '🤔 Thinking...',
-          })
-        }
+            const toolCallObj = {
+              tool: toolCall.toolName,
+              args: toolCall.args,
+              result: toolResult,
+            }
 
-        if (step.status === 'tool_call') {
-          const toolCall = {
-            tool: step.toolCall.name,
-            args: step.toolCall.args,
-          }
-
-          // Store the tool call for later reference
-          toolCalls.set(step.id, toolCall)
-
-          sendEvent('message', {
-            type: 'tool_call',
-            content: `Calling tool: ${step.toolCall.name}`,
-            toolCall,
-          })
-        }
-
-        if (step.status === 'tool_result') {
-          // Update the stored tool call with the result
-          const toolCall = toolCalls.get(step.id)
-          if (toolCall) {
-            toolCall.result = step.result
+            toolCalls.set(toolCall.toolCallId, toolCallObj)
 
             sendEvent('message', {
-              type: 'tool_result',
-              content: `Got result from tool: ${toolCall.tool}`,
-              toolCall,
+              type: 'tool_call',
+              content: `Calling tool: ${toolCall.toolName}`,
+              toolCall: toolCallObj,
             })
+
+            if (toolResult) {
+              sendEvent('message', {
+                type: 'tool_result',
+                content: `Got result from tool: ${toolCall.toolName}`,
+                toolCall: toolCallObj,
+              })
+            }
           }
         }
       },
