@@ -8,7 +8,6 @@ type ToolCall = {
   result?: any
 }
 
-// Instead of having separate chunks, we'll maintain a single response that gets updated
 interface ChatState {
   text: string
   toolCalls: ToolCall[]
@@ -24,14 +23,6 @@ function App() {
     toolCalls: [],
     isComplete: false
   })
-  const responseEndRef = useRef<HTMLDivElement>(null)
-
-  // Auto-scroll to bottom when response updates
-  useEffect(() => {
-    if (responseEndRef.current) {
-      responseEndRef.current.scrollIntoView({ behavior: 'smooth' })
-    }
-  }, [response])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -53,19 +44,16 @@ function App() {
         setResponse(prev => {
           switch (data.type) {
             case 'text':
-              // Append new text to existing text
               return {
                 ...prev,
                 text: prev.text + data.content
               }
             case 'tool_call':
-              // Add new tool call to the array
               return {
                 ...prev,
                 toolCalls: [...prev.toolCalls, data.toolCall]
               }
             case 'tool_result':
-              // Update the matching tool call with its result
               const updatedToolCalls = prev.toolCalls.map(tc =>
                 tc.tool === data.toolCall.tool ? data.toolCall : tc
               )
@@ -101,38 +89,56 @@ function App() {
     }
   }
 
-  // Render a tool call with special UI
-  const renderToolCall = (toolCall: ToolCall, index: number) => {
+  // Render search-like results in a horizontal scrolling container
+  const renderSearchResults = (results: any[]) => {
     return (
-      <div key={index} className="tool-call">
-        <div className="tool-call-header">
-          <span className="tool-name">{toolCall.tool}</span>
-          <span className="tool-status">{toolCall.result ? 'completed' : 'called'}</span>
+      <div className="results-scroll">
+        <div className="results-container">
+          {results.map((result, index) => (
+            <div key={index} className="result-card">
+              <h3>{result.title}</h3>
+              <p>{result.snippet}</p>
+            </div>
+          ))}
         </div>
-        <div className="tool-call-content">
-          <pre>{JSON.stringify(toolCall.args, null, 2)}</pre>
-        </div>
-        {toolCall.result && (
-          <div className="tool-call-result">
-            <pre>{JSON.stringify(toolCall.result, null, 2)}</pre>
+      </div>
+    )
+  }
+
+  // Render tool results based on their type
+  const renderToolResult = (toolCall: ToolCall) => {
+    if (!toolCall.result) return null
+
+    // If the result has a results array (like search results), render as cards
+    if (Array.isArray(toolCall.result.results)) {
+      return renderSearchResults(toolCall.result.results)
+    }
+
+    // For weather-like results, render as a single card
+    return (
+      <div className="single-result-card">
+        {Object.entries(toolCall.result).map(([key, value]) => (
+          <div key={key} className="result-item">
+            <span className="result-label">{key}:</span>
+            <span className="result-value">{value as string}</span>
           </div>
-        )}
+        ))}
       </div>
     )
   }
 
   return (
     <div className="app">
-      <div className="chat-container">
-        {/* Input section at the top */}
+      <div className="content">
+        {/* Input section */}
         <div className="input-section">
           <form onSubmit={handleSubmit}>
-            <textarea
+            <input
+              type="text"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              placeholder="Enter your prompt here..."
+              placeholder="Ask anything..."
               disabled={isLoading}
-              rows={3}
             />
             <button type="submit" disabled={isLoading || !prompt.trim()}>
               {isLoading ? 'Processing...' : 'Send'}
@@ -140,12 +146,16 @@ function App() {
           </form>
         </div>
 
-        {/* Response section below */}
-        <div className="response-section">
-          {/* Tool calls section */}
+        {/* Results section */}
+        <div className="results-section">
+          {/* Tool Results */}
           {response.toolCalls.length > 0 && (
-            <div className="tool-calls-section">
-              {response.toolCalls.map((tc, i) => renderToolCall(tc, i))}
+            <div className="tool-results">
+              {response.toolCalls.map((tc, i) => (
+                <div key={i} className="tool-result">
+                  {renderToolResult(tc)}
+                </div>
+              ))}
             </div>
           )}
 
@@ -156,68 +166,61 @@ function App() {
             </div>
           )}
 
-          {isLoading && <div className="loading">Thinking...</div>}
+          {isLoading && <div className="loading">Processing your request...</div>}
           {response.error && <div className="error">{response.error}</div>}
-          <div ref={responseEndRef} />
         </div>
       </div>
 
       <style jsx>{`
         .app {
-          height: 100vh;
-          max-width: 1000px;
-          margin: 0 auto;
-          padding: 20px;
-          display: flex;
-          flex-direction: column;
+          min-height: 100vh;
+          background: #f8f9fa;
+          padding: 2rem;
         }
 
-        .chat-container {
-          flex: 1;
+        .content {
+          max-width: 1200px;
+          margin: 0 auto;
           display: flex;
           flex-direction: column;
-          gap: 20px;
-          background: white;
-          border-radius: 12px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-          overflow: hidden;
+          gap: 2rem;
         }
 
         .input-section {
-          padding: 20px;
-          background: #f8f9fa;
-          border-bottom: 1px solid #e9ecef;
+          background: white;
+          padding: 1.5rem;
+          border-radius: 12px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
-        .input-section form {
+        form {
           display: flex;
-          flex-direction: column;
-          gap: 10px;
+          gap: 1rem;
         }
 
-        textarea {
-          width: 100%;
-          padding: 12px;
-          border: 1px solid #dee2e6;
-          border-radius: 6px;
-          font-size: 16px;
-          resize: none;
-          font-family: inherit;
+        input {
+          flex: 1;
+          padding: 1rem 1.5rem;
+          font-size: 1.1rem;
+          border: 2px solid #e9ecef;
+          border-radius: 8px;
+          transition: all 0.2s;
         }
 
-        textarea:focus {
+        input:focus {
           outline: none;
-          border-color: #4dabf7;
-          box-shadow: 0 0 0 2px rgba(77, 171, 247, 0.2);
+          border-color: #228be6;
+          box-shadow: 0 0 0 3px rgba(34, 139, 230, 0.1);
         }
 
         button {
-          padding: 12px 24px;
+          padding: 0 2rem;
           background: #228be6;
           color: white;
           border: none;
-          border-radius: 6px;
-          font-size: 16px;
+          border-radius: 8px;
+          font-size: 1rem;
+          font-weight: 500;
           cursor: pointer;
           transition: background 0.2s;
         }
@@ -231,99 +234,131 @@ function App() {
           cursor: not-allowed;
         }
 
-        .response-section {
-          flex: 1;
-          padding: 20px;
-          overflow-y: auto;
+        .results-section {
           display: flex;
           flex-direction: column;
-          gap: 16px;
+          gap: 2rem;
+        }
+
+        .tool-results {
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+        }
+
+        .results-scroll {
+          width: 100%;
+          overflow-x: auto;
+          padding: 0.5rem;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        .results-container {
+          display: flex;
+          gap: 1rem;
+          padding: 0.5rem;
+        }
+
+        .result-card {
+          flex: 0 0 300px;
+          background: white;
+          padding: 1.5rem;
+          border-radius: 12px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-card h3 {
+          margin: 0 0 1rem 0;
+          color: #1a1a1a;
+          font-size: 1.1rem;
+        }
+
+        .result-card p {
+          color: #666;
+          font-size: 0.95rem;
+          margin: 0;
+        }
+
+        .single-result-card {
+          background: white;
+          padding: 1.5rem;
+          border-radius: 12px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-item {
+          display: flex;
+          justify-content: space-between;
+          padding: 0.75rem 0;
+          border-bottom: 1px solid #f1f3f5;
+        }
+
+        .result-item:last-child {
+          border-bottom: none;
+        }
+
+        .result-label {
+          color: #868e96;
+          font-weight: 500;
+          text-transform: capitalize;
+        }
+
+        .result-value {
+          color: #1a1a1a;
+          font-weight: 500;
         }
 
         .markdown-response {
+          background: white;
+          padding: 2rem;
+          border-radius: 12px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
           line-height: 1.6;
-          color: #343a40;
         }
 
         .markdown-response :global(h1),
         .markdown-response :global(h2),
         .markdown-response :global(h3) {
-          margin-top: 24px;
-          margin-bottom: 16px;
-          font-weight: 600;
-          line-height: 1.25;
+          margin-top: 1.5rem;
+          margin-bottom: 1rem;
+          color: #1a1a1a;
         }
 
         .markdown-response :global(p) {
-          margin-bottom: 16px;
+          margin-bottom: 1rem;
+          color: #444;
         }
 
         .markdown-response :global(pre) {
           background: #f8f9fa;
-          padding: 16px;
+          padding: 1rem;
           border-radius: 6px;
           overflow-x: auto;
+          margin: 1rem 0;
         }
 
         .markdown-response :global(code) {
           font-family: monospace;
-          font-size: 14px;
-        }
-
-        .tool-call {
-          border: 1px solid #e9ecef;
-          border-radius: 8px;
-          overflow: hidden;
-          margin-bottom: 16px;
-        }
-
-        .tool-call-header {
-          display: flex;
-          justify-content: space-between;
-          padding: 12px 16px;
-          background: #f1f3f5;
-          border-bottom: 1px solid #e9ecef;
-        }
-
-        .tool-name {
-          font-weight: 600;
-          color: #228be6;
-        }
-
-        .tool-status {
-          color: #868e96;
-          font-size: 14px;
-        }
-
-        .tool-call-content,
-        .tool-call-result {
-          padding: 16px;
-        }
-
-        .tool-call-result {
-          background: #f8f9fa;
-          border-top: 1px dashed #e9ecef;
+          font-size: 0.9rem;
         }
 
         .loading {
+          text-align: center;
           color: #868e96;
           font-style: italic;
-          text-align: center;
-          padding: 12px;
+          padding: 2rem;
+          background: white;
+          border-radius: 12px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .error {
-          color: #e03131;
           text-align: center;
-          padding: 12px;
+          color: #e03131;
+          padding: 2rem;
           background: #fff5f5;
-          border-radius: 6px;
-        }
-
-        pre {
-          margin: 0;
-          white-space: pre-wrap;
-          word-wrap: break-word;
+          border-radius: 12px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
       `}</style>
     </div>
