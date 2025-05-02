@@ -452,22 +452,23 @@ User provided input: ${prompt}`
         {selectedWorkflow && (
           <>
             <div className="selected-workflow">
-              <h2>{selectedWorkflow}</h2>
-              <p>{workflows[selectedWorkflow]?.description}</p>
-              <button
-                className="back-button"
-                onClick={() => {
-                  setSelectedWorkflow('')
-                  setPrompt('')
-                  setResponse({
-                    chunks: [],
-                    isComplete: false,
-                  })
-                  setValidationResult(null)
-                }}
-              >
-                ← Back to workflows
-              </button>
+              <p>
+                <button
+                  className="back-button"
+                  onClick={() => {
+                    setSelectedWorkflow('')
+                    setPrompt('')
+                    setResponse({
+                      chunks: [],
+                      isComplete: false,
+                    })
+                    setValidationResult(null)
+                  }}
+                >
+                  ←
+                </button>{' '}
+                <b>{selectedWorkflow}</b> - {workflows[selectedWorkflow]?.description}
+              </p>
             </div>
 
             {renderValidationResults()}
@@ -584,7 +585,7 @@ User provided input: ${prompt}`
 
           .back-button {
             align-self: flex-start;
-            background: #f1f5f9;
+            background: white;
             color: #475569;
           }
 
@@ -725,11 +726,10 @@ User provided input: ${prompt}`
           }
 
           .selected-workflow {
-            padding: 16px;
-            background: #f0f9ff;
+            padding-top: 16px;
+            padding-bottom: 16px;
             border-radius: 8px;
             margin-bottom: 16px;
-            border: 1px solid #bae6fd;
           }
 
           .selected-workflow h2 {
