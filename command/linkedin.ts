@@ -81,9 +81,8 @@ export class SDR {
     // Network parameter is "F" for first-degree connections, "S" for second-degree
     const networkParam = degree === 'first' ? 'F' : 'S'
 
-    // Launch a browser
     const browser = await puppeteer.launch({
-      headless: false,
+      headless: true,
       defaultViewport: null,
       args: ['--start-maximized'],
     })
