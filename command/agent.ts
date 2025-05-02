@@ -24,12 +24,16 @@ export async function doAgentLoop(
 ): Promise<string> {
   let completeText = ''
 
+  console.log('Tools:', tools)
   const { textStream, fullStream } = streamText({
     model: anthropic('claude-3-7-sonnet-latest'),
     prompt,
     tools,
     maxSteps: steps,
     onStepFinish: onStep,
+    onError: (error) => {
+      console.error('Error:', error)
+    },
   })
 
   for await (const chunk of textStream) {

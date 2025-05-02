@@ -96,6 +96,7 @@ export async function createApp() {
     }
 
     const toolCalls = new Map<string, any>()
+    const tools = await getToolsLazy()
 
     doAgentLoop(
       prompt,
@@ -136,10 +137,9 @@ export async function createApp() {
           content: chunk,
         })
       },
-      await getToolsLazy(),
+      tools,
     )
       .then(() => {
-        // Send done event when complete
         sendEvent('done', { complete: true })
         res.end()
       })

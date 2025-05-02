@@ -506,18 +506,10 @@ User provided input: ${prompt}`
                           {chunk.content}
                         </div>
                       )
-                    case 'tool_call':
-                      return (
-                        <div key={index} className={`tool-call-wrapper ${chunk.type}`}>
-                          {renderToolResult(chunk.content, index)}
-                        </div>
-                      )
+                    // case 'tool_call':
+                    //   return <div key={index}>{renderToolResult(chunk.content, index)}</div>
                     case 'tool_result':
-                      return (
-                        <div key={index} className={`tool-result ${chunk.type}`}>
-                          {renderToolResult(chunk.content, index)}
-                        </div>
-                      )
+                      return <div key={index}>{renderToolResult(chunk.content, index)}</div>
                   }
                 })}
                 {response.error && <div className="error">{response.error}</div>}
@@ -591,14 +583,12 @@ User provided input: ${prompt}`
           }
           
           .response-area {
+            padding-top: 32px;
             display: flex;
             flex-direction: column;
             gap: 16px;
             min-height: 200px;
-            border: 1px solid #e2e8f0;
             border-radius: 8px;
-            padding: 16px;
-            background: #f8fafc;
           }
           
           .text-response {

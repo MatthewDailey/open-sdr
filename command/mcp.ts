@@ -57,7 +57,7 @@ export async function startClientAndGetTools(): Promise<{
     const clientTools = await client.tools()
 
     const prefixedClientTools = Object.fromEntries(
-      Object.entries(clientTools).map(([key, tool]) => [name + '::' + key, tool]),
+      Object.entries(clientTools).map(([key, tool]) => [name + '_' + key, tool]),
     )
     Object.assign(allTools, prefixedClientTools)
 
