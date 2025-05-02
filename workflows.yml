@@ -20,4 +20,4 @@ Gather Background:
   steps:
     - Search the web for news about a company.
     - Find people I know who work at the company.
-    - Collate a report.
+    - Collate a report and save to Google Drive.

@@ -243,11 +243,8 @@ User provided input: ${prompt}`
   }
 
   // Parse person info from the tool result text
-  const parsePersonInfo = (result: any): PersonInfo | null => {
-    if (!isPersonInfoResult(result)) return null
-
-    const content = result.content.find((item: any) => item.type === 'text')?.text || ''
-    const lines = content.split('\n')
+  const parsePersonInfo = (result: string): PersonInfo | null => {
+    const lines = result.split('\n')
 
     const personInfo: PersonInfo = {
       name: '',
@@ -274,7 +271,7 @@ User provided input: ${prompt}`
   // Render a person card for special tool results
   const renderPersonCard = (personInfo: PersonInfo) => {
     return (
-      <div className="person-card">
+      <div className="person-card" onClick={() => window.open(personInfo.profileLink, '_blank')}>
         <div className="person-avatar">
           <Avatar.Root className="avatar-root">
             <Avatar.Image
@@ -293,16 +290,6 @@ User provided input: ${prompt}`
         <div className="person-info">
           <div className="person-name">{personInfo.name}</div>
           <div className="person-role">{personInfo.role}</div>
-          {personInfo.profileLink && (
-            <a
-              href={personInfo.profileLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="profile-link"
-            >
-              View Profile
-            </a>
-          )}
         </div>
       </div>
     )
@@ -313,8 +300,13 @@ User provided input: ${prompt}`
     if (!toolCall.result) return null
 
     const isExpanded = expandedTools[index] || false
-    const personInfo = parsePersonInfo(toolCall.result)
+    const linkedinProfiles = toolCall.result.result.content
+      .filter((item: any) => item.type === 'text')
+      .filter((item: any) => item.text.startsWith('LINKEDIN'))
+      .map((item: any) => parsePersonInfo(item.text))
+      .filter((personInfo: PersonInfo) => personInfo !== null)
 
+    console.log('linkedinProfiles', linkedinProfiles)
     return (
       <Collapsible.Root
         className={`tool-result ${isExpanded ? 'expanded' : 'collapsed'}`}
@@ -322,16 +314,13 @@ User provided input: ${prompt}`
       >
         <div className="tool-header" onClick={() => toggleToolExpansion(index)}>
           <div className="tool-name">{toolCall.tool}</div>
-          <button className="expand-button">{isExpanded ? '−' : '+'}</button>
         </div>
 
         <Collapsible.Content className="tool-content">
-          {personInfo ? (
-            renderPersonCard(personInfo)
-          ) : (
-            <pre className="tool-data">{JSON.stringify(toolCall.result, null, 2)}</pre>
-          )}
+          <pre className="tool-data">{JSON.stringify(toolCall.result, null, 2)}</pre>
         </Collapsible.Content>
+
+        {linkedinProfiles.map((personInfo: PersonInfo) => renderPersonCard(personInfo))}
       </Collapsible.Root>
     )
   }
@@ -786,6 +775,11 @@ User provided input: ${prompt}`
           .person-info {
             display: flex;
             flex-direction: column;
+          }
+
+          .person-card:hover {
+            cursor: pointer;
+            background: #f8fafc;
           }
           
           .person-name {
