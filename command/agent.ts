@@ -43,37 +43,3 @@ export async function doAgentLoop(
 
   return completeText
 }
-
-/**
- * Example usage with a weather tool
- */
-/* 
-const weatherTool = {
-  description: 'Get the current weather in a given location',
-  parameters: z.object({
-    location: z.string().describe('The city and state, e.g., San Francisco, CA'),
-  }),
-  execute: async ({ location }) => {
-    // In a real implementation, this would call a weather API
-    console.log(`Getting weather for ${location}`);
-    return {
-      temperature: '72°F',
-      condition: 'Sunny',
-      humidity: '45%',
-      location
-    };
-  },
-};
-
-// Example of calling the agent with a tool
-const response = await doAgentLoop(
-  'What\'s the weather like in San Francisco?',
-  (step) => {
-    console.log('Step:', step);
-  },
-  (chunk) => {
-    process.stdout.write(chunk);
-  },
-  { weatherTool }
-);
-*/
