@@ -3,7 +3,7 @@ Find Leads:
   input: Describe the type of companies to search for.
   steps:
     - Search the web and collect pages that might contain relevant companies. Only do a single search and ALWAYS get citations for your searches.
-    - Read those pages to get first hand and collate a list of companies to look at.
+    - Once you have citations, scrape/read those pages to get first hand and collate a list of companies to look at.
     - Find people I know who work at those companies. If no first connections are available, find second degree connections.
     - Save to my Leads database in Notion.
 
