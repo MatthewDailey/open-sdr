@@ -56,9 +56,12 @@ export async function startClientAndGetTools(): Promise<{
 
     const clientTools = await client.tools()
 
-    Object.assign(allTools, clientTools)
+    const prefixedClientTools = Object.fromEntries(
+      Object.entries(clientTools).map(([key, tool]) => [name + '::' + key, tool]),
+    )
+    Object.assign(allTools, prefixedClientTools)
 
-    console.log(`Added tools from ${name}: ${Object.keys(clientTools).join(', ')}`)
+    console.log(`Added tools from ${name}: ${Object.keys(prefixedClientTools).join(', ')}`)
   }
 
   console.log('All MCP clients ready.')
