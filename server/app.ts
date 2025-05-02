@@ -12,6 +12,7 @@ import fs from 'fs'
 import yaml from 'js-yaml'
 import path from 'path'
 import { validateWorkflow } from './validate_workflow'
+import { getToolsLazy } from './singleton_mcp_server'
 
 export async function createApp() {
   const app = express()
@@ -62,9 +63,7 @@ export async function createApp() {
       if (!workflow) {
         return res.status(400).json({ error: 'Workflow is required' })
       }
-
-      const { tools } = await startClientAndGetTools()
-      const validationResult = await validateWorkflow(workflow, tools)
+      const validationResult = await validateWorkflow(workflow, await getToolsLazy())
 
       return res.json(validationResult)
     } catch (error) {
@@ -96,15 +95,7 @@ export async function createApp() {
       res.write(`data: ${JSON.stringify(data)}\n\n`)
     }
 
-    // Tool tracking
     const toolCalls = new Map<string, any>()
-
-    sendEvent('message', {
-      type: 'text',
-      content: '⚒️ Setting up tools...',
-    })
-
-    const { tools } = await startClientAndGetTools()
 
     doAgentLoop(
       prompt,
@@ -145,7 +136,7 @@ export async function createApp() {
           content: chunk,
         })
       },
-      tools,
+      await getToolsLazy(),
     )
       .then(() => {
         // Send done event when complete
