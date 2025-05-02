@@ -15,10 +15,10 @@ const mcpCommands = [
     name: 'apify-web-scraper',
     command: ['npx', '-y', '@apify/actors-mcp-server', '--actors', 'apify/web-scraper'],
   },
-  {
-    name: 'ref-tools',
-    command: ['npx', '-y', 'ref-tools-mcp'],
-  },
+  // {
+  //   name: 'ref-tools',
+  //   command: ['npx', '-y', 'ref-tools-mcp'],
+  // },
   {
     name: 'rime',
     command: ['npx', '-y', 'rime-mcp'],
