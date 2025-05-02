@@ -4,6 +4,7 @@ import * as Collapsible from '@radix-ui/react-collapsible'
 import * as Avatar from '@radix-ui/react-avatar'
 import { Theme, ThemePanel } from '@radix-ui/themes'
 import '@radix-ui/themes/styles.css'
+import { isValid } from 'zod'
 
 // Types for our response chunks
 type ToolCall = {
@@ -345,18 +346,14 @@ User provided input: ${prompt}`
       )
     }
 
-    if (!validationResult) return null
+    if (!validationResult || validationResult.workflowSupported) return null
 
     return (
       <div
         className={`validation-result ${validationResult.workflowSupported ? 'supported' : 'unsupported'}`}
       >
         <div className="validation-status">
-          {validationResult.workflowSupported ? (
-            <div className="supported-message">
-              <span className="emoji">✅</span> This workflow is fully supported!
-            </div>
-          ) : (
+          {!validationResult.workflowSupported && (
             <div className="unsupported-message">
               <span className="emoji">❌</span> This workflow cannot be completed with current
               capabilities
@@ -452,37 +449,40 @@ User provided input: ${prompt}`
         {selectedWorkflow && (
           <>
             <div className="selected-workflow">
-              <p>
-                <button
-                  className="back-button"
-                  onClick={() => {
-                    setSelectedWorkflow('')
-                    setPrompt('')
-                    setResponse({
-                      chunks: [],
-                      isComplete: false,
-                    })
-                    setValidationResult(null)
-                  }}
-                >
-                  ←
-                </button>{' '}
-                <b>{selectedWorkflow}</b> - {workflows[selectedWorkflow]?.description}
-              </p>
+              <button
+                className="back-button"
+                onClick={() => {
+                  setSelectedWorkflow('')
+                  setPrompt('')
+                  setResponse({
+                    chunks: [],
+                    isComplete: false,
+                  })
+                  setValidationResult(null)
+                }}
+              >
+                ←
+              </button>
+              <b>{selectedWorkflow}</b>
+              <p>{workflows[selectedWorkflow]?.description}</p>
+              {validationResult && (
+                <p>
+                  {validationResult.workflowSupported ? '✅' : '❌'}
+                  {validationResult.workflowSupported ? '' : 'Unsupported'}
+                </p>
+              )}
             </div>
 
             {renderValidationResults()}
 
             <form onSubmit={handleSubmit}>
-              <label htmlFor="prompt">{workflows[selectedWorkflow]?.input}:</label>
+              <label htmlFor="prompt">{workflows[selectedWorkflow]?.input}</label>
               <textarea
                 id="prompt"
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 placeholder={`Enter ${workflows[selectedWorkflow]?.input.toLowerCase()}...`}
-                disabled={
-                  isLoading || (validationResult !== null && !validationResult.workflowSupported)
-                }
+                disabled={validationResult === null || !validationResult.workflowSupported}
                 rows={4}
               />
               <button
@@ -726,6 +726,10 @@ User provided input: ${prompt}`
           }
 
           .selected-workflow {
+            display: flex;
+            flex-direction: row;
+            gap: 16px;
+            align-items: center;
             padding-top: 16px;
             padding-bottom: 16px;
             border-radius: 8px;
@@ -738,7 +742,6 @@ User provided input: ${prompt}`
           }
 
           .selected-workflow p {
-            margin: 0 0 16px 0;
             color: #475569;
           }
 
