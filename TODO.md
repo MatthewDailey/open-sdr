@@ -15,16 +15,34 @@ workflow:
   output: list of people I know who work at or on those 
 3. Save to markdown file
 
+company_background(company or tool name) -> deep research + structured extract
+- name
+- urls (homepage, linkedin)
+- product + billing
+- recent funding
+- people: [{}]
+
+
 
 # TODO
 
 [x] clean up hackathon stuff
-[] try firecrawl deep research
-  [] add a new cli command to hit it directly
-  [] try with MCP
+[x] try firecrawl deep research
+  [x] add a new cli command to
+  [x] try one big prompt to find all -> too short, didn't look far enough
+  [x] try single companny -> worked pretty well! but quite long. need to have gemini synthesize
+[x] try openai deep research
+  [x] try on big prompt -> slow, and manual means less interesting to build
+  [x] try single company -> actually less useful than firecrawl version 
+[] SDR.gatherCompanyBackground(companyName)
+[] SDR.findConnectionsToPerson(personName)
+[] add puppeteer stealth mode
 [] add a 'list-tools' cli command
 [] update mcp config to allow including only sepecific tools
 [] generalize linkedin connection search
 [] given a person, find people i know who know them
 [] write file tool
-[] delete the web app? -> replace with something more useful
+[] publishing
+  [] generate landing page
+  [] update commands to `sdr` and `server`
+  [] delete the hackathon web app

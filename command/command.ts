@@ -13,6 +13,7 @@ import type { Activity } from './firecrawl'
 import chalk from 'chalk'
 import fs from 'fs'
 import path from 'path'
+import yaml from 'js-yaml'
 
 yargs(hideBin(process.argv))
   .command('login', 'Login to LinkedIn and save cookies', {}, async (argv) => {
@@ -97,13 +98,14 @@ yargs(hideBin(process.argv))
     },
     async (argv) => {
       let query: string
+      let inputFilePath: string | undefined
 
       // Determine query source - either from command line or from file
       if (argv.file) {
         try {
-          const filePath = path.resolve(argv.file as string)
-          console.log(chalk.blue(`Loading query from file: ${filePath}`))
-          query = fs.readFileSync(filePath, 'utf8').trim()
+          inputFilePath = path.resolve(argv.file as string)
+          console.log(chalk.blue(`Loading query from file: ${inputFilePath}`))
+          query = fs.readFileSync(inputFilePath, 'utf8').trim()
 
           // If file content is too short, warn the user
           if (query.length < 5) {
@@ -130,7 +132,14 @@ yargs(hideBin(process.argv))
       const maxDepth = argv.depth as number
       const timeLimit = argv['time-limit'] as number
       const maxUrls = argv['max-urls'] as number
-      const outputPath = argv.output as string | undefined
+      let outputPath = argv.output as string | undefined
+
+      // If input file was used but no output specified, create default output path
+      if (inputFilePath && !outputPath) {
+        const inputDir = path.dirname(inputFilePath)
+        const inputBasename = path.basename(inputFilePath, path.extname(inputFilePath))
+        outputPath = path.join(inputDir, `${inputBasename}.results.yaml`)
+      }
 
       console.log(chalk.blue(`Starting deep research: "${query}"`))
       console.log(
@@ -196,7 +205,13 @@ yargs(hideBin(process.argv))
               },
             }
 
-            fs.writeFileSync(outputPath, JSON.stringify(outputContent, null, 2), 'utf8')
+            // Convert to YAML and save
+            const yamlContent = yaml.dump(outputContent, {
+              indent: 2,
+              lineWidth: 120,
+              noRefs: true,
+            })
+            fs.writeFileSync(outputPath, yamlContent, 'utf8')
 
             console.log(chalk.green(`\nResults saved to: ${outputPath}`))
           } catch (error: any) {
