@@ -5,6 +5,8 @@
 import { google } from '@ai-sdk/google'
 import { generateObject } from 'ai'
 import { z } from 'zod'
+import fs from 'fs'
+import path from 'path'
 
 // Interface for message content types
 interface TextPart {
@@ -38,21 +40,33 @@ export class GoogleAI {
    * Generate structured data from a prompt with optional image
    * @param prompt Text prompt to send to the model
    * @param schema Zod schema representing the structure of the desired output
-   * @param imageUrl Optional URL of an image to include with the prompt
+   * @param imagePath Optional path to a local image file to include with the prompt
    * @returns Generated structured data according to the provided schema
    */
   async generateStructuredData<T extends z.ZodType>(
     prompt: string,
     schema: T,
-    imageUrl?: string,
+    imagePath?: string,
   ): Promise<z.infer<T>> {
     try {
       let content: MessageContent = prompt
 
-      if (imageUrl) {
+      if (imagePath) {
+        // Verify the image exists
+        if (!fs.existsSync(imagePath)) {
+          throw new Error(`Image not found at path: ${imagePath}`)
+        }
+
+        // Create a data URL from the image file
+        const imageBuffer = fs.readFileSync(imagePath)
+        const fileExtension = path.extname(imagePath).substring(1)
+        const mimeType = `image/${fileExtension}`
+        const base64Image = imageBuffer.toString('base64')
+        const dataUrl = `data:${mimeType};base64,${base64Image}`
+
         content = [
           { type: 'text', text: prompt },
-          { type: 'image', image: new URL(imageUrl) },
+          { type: 'image', image: new URL(dataUrl) },
         ]
       }
 

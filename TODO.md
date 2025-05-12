@@ -35,9 +35,9 @@ company_background(company or tool name) -> deep research + structured extract
   [x] try on big prompt -> slow, and manual means less interesting to build
   [x] try single company -> actually less useful than firecrawl version 
 [x] add puppeteer stealth mode
-[] generalize Linkedin.findConnectionsAt(companyName) 
-  [] extract linkedinurls
-  [] screenshot and have gemini return the names and roles + the link as an object
+[x] generalize Linkedin.findConnectionsAt(companyName) 
+  [x] extract linkedinurls
+  [x] screenshot and have gemini return the names and roles + the link as an object
 [] SDR.gatherCompanyBackground(companyName)
 [] LinkedIn.findConnectionsToPerson(personName)
 [] add a 'list-tools' cli command
@@ -52,6 +52,7 @@ company_background(company or tool name) -> deep research + structured extract
   [] try adding store to notion (after allowing filter tools)
 [] publishing
   [] read env from .env
+  [] clean up logs
   [] generate landing page (simpleanalytics)
   [] update commands to `sdr` and `server`
   [] delete the hackathon web app

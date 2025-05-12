@@ -11,12 +11,17 @@ import { cleanUrlQueryParams } from '../utils/url'
 
 puppeteer.use(StealthPlugin())
 
-export type Profile = {
-  name: string
-  role: string
-  image: string
-  profileLink: string
-}
+import { z } from 'zod'
+import { GoogleAI } from './google'
+
+export const ProfileSchema = z.object({
+  name: z.string(),
+  role: z.string(),
+  company: z.string(),
+  profileUrl: z.string(),
+})
+
+export type Profile = z.infer<typeof ProfileSchema>
 
 /**
  * Class for LinkedIn automation
@@ -49,7 +54,7 @@ export class LinkedIn {
           const cookiesStr = fs.readFileSync(this.cookiesPath, 'utf8')
           const cookiesArr = JSON.parse(cookiesStr)
           await page.setCookie(...cookiesArr)
-          console.log('Previous cookies loaded')
+          // console.log('Previous cookies loaded')
         } catch (err) {
           console.warn('Error loading cookies:', err)
         }
@@ -103,7 +108,7 @@ export class LinkedIn {
           const cookiesStr = fs.readFileSync(this.cookiesPath, 'utf8')
           const cookiesArr = JSON.parse(cookiesStr)
           await page.setCookie(...cookiesArr)
-          console.log('Previous cookies loaded')
+          // console.log('Previous cookies loaded')
         } catch (err) {
           console.warn('Error loading cookies:', err)
         }
@@ -116,24 +121,26 @@ export class LinkedIn {
       // Construct the search URL
       const searchUrl = `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(companyName)}&network=["${networkParam}"]`
 
-      console.log(`Finding ${degree} degree connections at ${companyName}...`)
-      console.log(`Navigating to: ${searchUrl}`)
+      // console.log(`Finding ${degree} degree connections at ${companyName}...`)
+      // console.log(`Navigating to: ${searchUrl}`)
 
       await page.goto(searchUrl, { waitUntil: 'load' })
       await new Promise((resolve) => setTimeout(resolve, 5000))
 
       // Take a screenshot and save it with the company name
-      const screenshotFilename = `${companyName.replace(/\s+/g, '_')}_connections.png`
+      const screenshotPath = path.join(
+        process.cwd(),
+        'search_screenshots',
+        `${companyName.replace(/\s+/g, '_')}_connections.png`,
+      )
       await page.screenshot({
-        path: path.join('search_screenshots', screenshotFilename),
+        path: screenshotPath,
         fullPage: true,
       })
-      console.log(`Screenshot saved to ${screenshotFilename}`)
+      console.log(`Search results screenshot saved to ${screenshotPath}`)
 
-      console.log('Browser open with search results. Close the browser when finished.')
-
-      const profiles: Profile[] = await page.evaluate(() => {
-        const results: Profile[] = []
+      const profileUrls: string[] = await page.evaluate(() => {
+        const results: string[] = []
 
         // Find all links on the page that match LinkedIn profile URLs
         const profileLinks = Array.from(document.querySelectorAll('a[href*="linkedin.com/in/"]'))
@@ -144,22 +151,20 @@ export class LinkedIn {
 
         // Create profile objects with just the links
         // Other fields are empty as we're only collecting links now
-        profileLinks.forEach((profileLink) => {
-          results.push({
-            name: '',
-            role: '',
-            image: '',
-            profileLink,
-          })
+        profileLinks.forEach((profileUrl) => {
+          results.push(profileUrl)
         })
 
         return results
       })
 
-      // Clean profile links by removing query parameters
-      profiles.forEach((profile) => {
-        profile.profileLink = cleanUrlQueryParams(profile.profileLink)
-      })
+      const google = new GoogleAI()
+      const profiles = await google.generateStructuredData(
+        'Here is a screenshot of a LinkedIn search results page and some urls that appear on that page. Match the urls to the profiles in the screenshot. Return a list of profiles with the following fields: name, role, company, profileUrl. If a url does not match any profile in the screenshot, do not include it in the list. The role is typically on the line in line "Current: <role> at <company>", only include the role. \n\n' +
+          profileUrls.map(cleanUrlQueryParams).join('\n'),
+        z.array(ProfileSchema),
+        screenshotPath,
+      )
 
       console.log(profiles)
 
