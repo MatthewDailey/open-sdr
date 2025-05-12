@@ -46,9 +46,10 @@ company_background(company or tool name) -> deep research + structured extract
   - copy and open search link https://www.linkedin.com/search/results/people/?facetNetwork=%22F%22&facetConnectionOf=%22ACoAACQesNsB19Z7ZTj7LiGKB3bUqp6GBbo6TbQ%22&origin=MEMBER_PROFILE_CANNED_SEARCH&lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base%3B1kJrr3YxQ%2FOwrzzN1FrKfg%3D%3D
   - open search and do same "open and get links" fn as findConnectionsAtd
 [x] update findConnectionsAt(degree=second) to use findConnectionsToPerson to find the warm intro for second connection
-[] loop over companies tool to ensure we hit every one
 [x] have research tools in SDR class and add to MCP
 [] add all MCP tools
+[] have all SDR functions return objects and markdown answer
+[] loop over companies tool to ensure we hit every one
 [] organize commands
   - `sdr login`
   - `sdr tools <command>` 

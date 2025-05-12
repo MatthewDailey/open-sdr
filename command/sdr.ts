@@ -103,7 +103,46 @@ export class SDR {
           return {
             content: profiles.map((profile) => ({
               type: 'text',
-              text: `LINKEDIN\nName: ${profile.name}\nRole: ${profile.role}\nCompany: ${profile.company}\nProfile Link: ${profile.profileUrl}`,
+              text: `Name: ${profile.name}\nRole: ${profile.role}\nCompany: ${profile.company}\nProfile Link: ${profile.profileUrl}`,
+            })),
+          }
+        },
+      )
+
+      server.tool(
+        'findProfile',
+        'Find a LinkedIn profile by name',
+        {
+          personName: z.string().describe('The person name to search for'),
+          companyName: z.string().optional().describe('Optional company name to filter results'),
+        },
+        async ({ personName, companyName }) => {
+          const profiles = await this.findProfile(personName, companyName)
+          return {
+            content: profiles.map((profile) => ({
+              type: 'text',
+              text: `Name: ${profile.name}\nRole: ${profile.role || 'N/A'}\nCompany: ${profile.company || 'N/A'}\nProfile Link: ${profile.profileUrl}`,
+            })),
+          }
+        },
+      )
+
+      server.tool(
+        'findMutualConnections',
+        'Find mutual connections with a person on LinkedIn',
+        {
+          personName: z.string().describe('The person name to search for'),
+          companyName: z
+            .string()
+            .optional()
+            .describe('Optional (but very helpful!) company name to filter results'),
+        },
+        async ({ personName, companyName }) => {
+          const connections = await this.findMutualConnections(personName, companyName)
+          return {
+            content: connections.map((profile) => ({
+              type: 'text',
+              text: `Name: ${profile.name}\nRole: ${profile.role || 'N/A'}\nCompany: ${profile.company || 'N/A'}\nProfile Link: ${profile.profileUrl}`,
             })),
           }
         },
@@ -114,11 +153,18 @@ export class SDR {
         'Gather comprehensive background information about a company',
         {
           companyName: z.string().describe('The company name to research'),
-          companyContext: z.string().optional().describe('Additional context about the company'),
+          companyContext: z
+            .string()
+            .optional()
+            .describe(
+              'Additional context about the company to help with research (eg "they are a startup", "they are in AI")',
+            ),
           peopleGuidance: z
             .string()
             .optional()
-            .describe('Specific focus for researching people at the company'),
+            .describe(
+              'Specific focus for researching people at the company (eg "business founders", "software engineers"',
+            ),
         },
         async ({ companyName, companyContext, peopleGuidance }) => {
           if (!process.env.FIRECRAWL_API_KEY || !process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
