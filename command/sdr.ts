@@ -96,8 +96,6 @@ export class SDR {
    */
   async gatherCompanyBackground(
     companyName: string,
-    firecrawlApiKey: string,
-    googleApiKey: string,
     options: {
       maxDepth?: number
       timeLimit?: number
@@ -106,8 +104,12 @@ export class SDR {
       companyContext?: string
       peopleGuidance?: string
     } = {},
-  ): Promise<CompanyBackground> {
-    return gatherCompanyBackground(companyName, firecrawlApiKey, googleApiKey, options)
+  ): Promise<SDRResult<CompanyBackground>> {
+    const data = await gatherCompanyBackground(companyName, options)
+    return {
+      text: `Company background for ${companyName}`,
+      data,
+    }
   }
 
   /**
@@ -131,10 +133,12 @@ export class SDR {
         async ({ companyName, degree }) => {
           const profiles = await this.findConnectionsAtCompany(companyName, degree)
           return {
-            content: profiles.map((profile) => ({
-              type: 'text',
-              text: `Name: ${profile.name}\nRole: ${profile.role}\nCompany: ${profile.company}\nProfile Link: ${profile.profileUrl}`,
-            })),
+            content: [
+              {
+                type: 'text',
+                text: profiles.text,
+              },
+            ],
           }
         },
       )
@@ -149,10 +153,12 @@ export class SDR {
         async ({ personName, companyName }) => {
           const profiles = await this.findProfile(personName, companyName)
           return {
-            content: profiles.map((profile) => ({
-              type: 'text',
-              text: `Name: ${profile.name}\nRole: ${profile.role || 'N/A'}\nCompany: ${profile.company || 'N/A'}\nProfile Link: ${profile.profileUrl}`,
-            })),
+            content: [
+              {
+                type: 'text',
+                text: profiles.text,
+              },
+            ],
           }
         },
       )
@@ -170,10 +176,12 @@ export class SDR {
         async ({ personName, companyName }) => {
           const connections = await this.findMutualConnections(personName, companyName)
           return {
-            content: connections.map((profile) => ({
-              type: 'text',
-              text: `Name: ${profile.name}\nRole: ${profile.role || 'N/A'}\nCompany: ${profile.company || 'N/A'}\nProfile Link: ${profile.profileUrl}`,
-            })),
+            content: [
+              {
+                type: 'text',
+                text: connections.text,
+              },
+            ],
           }
         },
       )
@@ -197,25 +205,16 @@ export class SDR {
             ),
         },
         async ({ companyName, companyContext, peopleGuidance }) => {
-          if (!process.env.FIRECRAWL_API_KEY || !process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
-            throw new Error('FIRECRAWL_API_KEY and GOOGLE_GENERATIVE_AI_API_KEY must be set')
-          }
-
-          const companyData = await this.gatherCompanyBackground(
-            companyName,
-            process.env.FIRECRAWL_API_KEY,
-            process.env.GOOGLE_GENERATIVE_AI_API_KEY,
-            {
-              companyContext,
-              peopleGuidance,
-            },
-          )
+          const companyData = await this.gatherCompanyBackground(companyName, {
+            companyContext,
+            peopleGuidance,
+          })
 
           return {
             content: [
               {
                 type: 'text',
-                text: `COMPANY BACKGROUND\nName: ${companyData.name}\nWebsite: ${companyData.homepageUrl}\nLinkedIn: ${companyData.linkedinUrl}\n\nProduct: ${companyData.productDescription}\n\nRecent News: ${companyData.recentNews}\n\nFunding: ${companyData.funding}\n\nKey People:\n${companyData.people.map((person) => `- ${person.name}: ${person.role}${person.linkedinUrl ? ` (${person.linkedinUrl})` : ''}`).join('\n')}`,
+                text: companyData.text,
               },
             ],
           }

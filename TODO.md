@@ -67,7 +67,7 @@ company_background(company or tool name) -> deep research + structured extract
   [] try adding an email enrichment service
   [] try adding store to notion (after allowing filter tools)
 [] publishing
-  [] read env from .env
+  [] read env from .env (implemented, validate this)
   [] clean up logs
   [] generate landing page (simpleanalytics) and figma sites!
   [] update commands to `sdr` and `server`

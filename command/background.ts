@@ -40,8 +40,6 @@ export type CompanyBackground = z.infer<typeof CompanyBackgroundSchema>
  */
 export async function gatherCompanyBackground(
   companyName: string,
-  firecrawlApiKey: string,
-  googleApiKey: string,
   options: {
     maxDepth?: number
     timeLimit?: number
@@ -59,6 +57,12 @@ export async function gatherCompanyBackground(
     companyContext = '',
     peopleGuidance = '',
   } = options
+  const firecrawlApiKey = process.env.FIRECRAWL_API_KEY
+  const googleApiKey = process.env.GOOGLE_API_KEY
+
+  if (!firecrawlApiKey || !googleApiKey) {
+    throw new Error('Firecrawl and Google API keys are required')
+  }
 
   const logVerbose = (message: string) => {
     if (verbose) console.log(chalk.blue(message))

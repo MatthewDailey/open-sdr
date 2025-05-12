@@ -15,7 +15,9 @@ import type { Activity } from './firecrawl'
 import { createFirecrawlClient } from './firecrawl'
 import { startClientAndGetTools } from './mcp'
 import { SDR } from './sdr'
+import dotenv from 'dotenv'
 
+dotenv.config()
 yargs(hideBin(process.argv))
   .command('login', 'Login to LinkedIn and save cookies', {}, async (argv) => {
     const sdr = new SDR()
@@ -104,27 +106,11 @@ yargs(hideBin(process.argv))
     'background <company>',
     'Gather comprehensive background information about a company',
     (yargs) => {
-      // Get API keys from environment variables if available
-      const envFirecrawlApiKey = process.env.FIRECRAWL_API_KEY || ''
-      const envGoogleApiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY || ''
-
       return yargs
         .positional('company', {
           describe: 'The company name to research',
           type: 'string',
           demandOption: true,
-        })
-        .option('firecrawl-api-key', {
-          describe: 'Firecrawl API key (defaults to FIRECRAWL_API_KEY env variable)',
-          type: 'string',
-          default: envFirecrawlApiKey,
-          demandOption: !envFirecrawlApiKey,
-        })
-        .option('google-api-key', {
-          describe: 'Google AI API key (defaults to GOOGLE_GENERATIVE_AI_API_KEY env variable)',
-          type: 'string',
-          default: envGoogleApiKey,
-          demandOption: !envGoogleApiKey,
         })
         .option('company-context', {
           describe:
@@ -165,8 +151,6 @@ yargs(hideBin(process.argv))
     },
     async (argv) => {
       const company = argv.company as string
-      const firecrawlApiKey = argv['firecrawl-api-key'] as string
-      const googleApiKey = argv['google-api-key'] as string
       const companyContext = argv['company-context'] as string | undefined
       const peopleGuidance = argv['people-guidance'] as string | undefined
       const maxDepth = argv.depth as number
@@ -174,24 +158,6 @@ yargs(hideBin(process.argv))
       const maxUrls = argv['max-urls'] as number
       const verbose = argv.verbose as boolean
       const outputPath = argv.output as string | undefined
-
-      if (!firecrawlApiKey) {
-        console.error(
-          chalk.red(
-            'Error: Firecrawl API key is required. Set it using --firecrawl-api-key or the FIRECRAWL_API_KEY environment variable.',
-          ),
-        )
-        process.exit(1)
-      }
-
-      if (!googleApiKey) {
-        console.error(
-          chalk.red(
-            'Error: Google AI API key is required. Set it using --google-api-key or the GOOGLE_GENERATIVE_AI_API_KEY environment variable.',
-          ),
-        )
-        process.exit(1)
-      }
 
       console.log(chalk.blue(`Gathering background information for: ${company}`))
       if (companyContext) {
@@ -206,19 +172,14 @@ yargs(hideBin(process.argv))
 
       try {
         // Gather company background information
-        const backgroundData = await gatherCompanyBackground(
-          company,
-          firecrawlApiKey,
-          googleApiKey,
-          {
-            maxDepth,
-            timeLimit,
-            maxUrls,
-            verbose,
-            companyContext,
-            peopleGuidance,
-          },
-        )
+        const backgroundData = await gatherCompanyBackground(company, {
+          maxDepth,
+          timeLimit,
+          maxUrls,
+          verbose,
+          companyContext,
+          peopleGuidance,
+        })
 
         // Display research results
         console.log(chalk.green('\n==== COMPANY BACKGROUND ====\n'))
