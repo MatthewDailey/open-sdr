@@ -1,4 +1,3 @@
-
 # Plan 
 
 "what if claude code were an SDR?"
@@ -20,7 +19,7 @@ company_background(company or tool name) -> deep research + structured extract
 - urls (homepage, linkedin)
 - product + billing
 - recent funding
-- people: [{}]
+- people: [{name, url, }]
 
 
 
@@ -38,8 +37,11 @@ company_background(company or tool name) -> deep research + structured extract
 [x] generalize Linkedin.findConnectionsAt(companyName) 
   [x] extract linkedinurls
   [x] screenshot and have gemini return the names and roles + the link as an object
-[] SDR.gatherCompanyBackground(companyName)
-[] LinkedIn.findConnectionsToPerson(personName)
+[x] gatherCompanyBackground(companyName)
+   [x] allow company context (eg ai tool builders)
+   [x] allow people guidance (eg types of people to look for)
+   [x] remove company size
+[] LinkedIn.findConnectionsToPerson(personName) - 
 [] add a 'list-tools' cli command
 [] update mcp config to allow including only sepecific tools
 [] given a person, find people i know who know them
@@ -47,13 +49,14 @@ company_background(company or tool name) -> deep research + structured extract
   [] rename "Chrome for Testing" to "Chrome for OpenSDR"
   [] login cli should have nicer messaging
 [] MCP explorations
-  [] write file tool to save results
+  [] write file tool to save results (eg as csv)
+  [] google sheets
   [] try adding an email enrichment service
   [] try adding store to notion (after allowing filter tools)
 [] publishing
   [] read env from .env
   [] clean up logs
-  [] generate landing page (simpleanalytics)
+  [] generate landing page (simpleanalytics) and figma sites!
   [] update commands to `sdr` and `server`
   [] delete the hackathon web app
   [] setup steps: firecrawl, gemini, anthropic

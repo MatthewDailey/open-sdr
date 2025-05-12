@@ -10,6 +10,7 @@ import path from 'path'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import { doAgentLoop } from './agent'
+import { gatherCompanyBackground } from './background'
 import type { Activity } from './firecrawl'
 import { createFirecrawlClient } from './firecrawl'
 import { startClientAndGetTools } from './mcp'
@@ -44,6 +45,179 @@ yargs(hideBin(process.argv))
       console.log(`Searching for ${degree} degree connections at ${company}...`)
       const sdr = new SDR()
       await sdr.findConnectionsAt(company, degree)
+    },
+  )
+  .command(
+    'background <company>',
+    'Gather comprehensive background information about a company',
+    (yargs) => {
+      // Get API keys from environment variables if available
+      const envFirecrawlApiKey = process.env.FIRECRAWL_API_KEY || ''
+      const envGoogleApiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY || ''
+
+      return yargs
+        .positional('company', {
+          describe: 'The company name to research',
+          type: 'string',
+          demandOption: true,
+        })
+        .option('firecrawl-api-key', {
+          describe: 'Firecrawl API key (defaults to FIRECRAWL_API_KEY env variable)',
+          type: 'string',
+          default: envFirecrawlApiKey,
+          demandOption: !envFirecrawlApiKey,
+        })
+        .option('google-api-key', {
+          describe: 'Google AI API key (defaults to GOOGLE_GENERATIVE_AI_API_KEY env variable)',
+          type: 'string',
+          default: envGoogleApiKey,
+          demandOption: !envGoogleApiKey,
+        })
+        .option('company-context', {
+          describe:
+            'Additional context about the company to help with research (e.g., "AI tool builder")',
+          type: 'string',
+        })
+        .option('people-guidance', {
+          describe:
+            'Guidance on what types of people to focus on (e.g., "engineers" or "marketing leaders")',
+          type: 'string',
+        })
+        .option('depth', {
+          describe: 'Maximum research depth (1-10)',
+          type: 'number',
+          default: 5,
+        })
+        .option('time-limit', {
+          describe: 'Time limit in seconds (30-300)',
+          type: 'number',
+          default: 180,
+        })
+        .option('max-urls', {
+          describe: 'Maximum URLs to analyze',
+          type: 'number',
+          default: 15,
+        })
+        .option('output', {
+          describe: 'Path to save research results to a file',
+          type: 'string',
+          alias: 'o',
+        })
+        .option('verbose', {
+          describe: 'Show detailed progress information',
+          type: 'boolean',
+          default: false,
+          alias: 'v',
+        })
+    },
+    async (argv) => {
+      const company = argv.company as string
+      const firecrawlApiKey = argv['firecrawl-api-key'] as string
+      const googleApiKey = argv['google-api-key'] as string
+      const companyContext = argv['company-context'] as string | undefined
+      const peopleGuidance = argv['people-guidance'] as string | undefined
+      const maxDepth = argv.depth as number
+      const timeLimit = argv['time-limit'] as number
+      const maxUrls = argv['max-urls'] as number
+      const verbose = argv.verbose as boolean
+      const outputPath = argv.output as string | undefined
+
+      if (!firecrawlApiKey) {
+        console.error(
+          chalk.red(
+            'Error: Firecrawl API key is required. Set it using --firecrawl-api-key or the FIRECRAWL_API_KEY environment variable.',
+          ),
+        )
+        process.exit(1)
+      }
+
+      if (!googleApiKey) {
+        console.error(
+          chalk.red(
+            'Error: Google AI API key is required. Set it using --google-api-key or the GOOGLE_GENERATIVE_AI_API_KEY environment variable.',
+          ),
+        )
+        process.exit(1)
+      }
+
+      console.log(chalk.blue(`Gathering background information for: ${company}`))
+      if (companyContext) {
+        console.log(chalk.blue(`Company context: ${companyContext}`))
+      }
+      if (peopleGuidance) {
+        console.log(chalk.blue(`People focus: ${peopleGuidance}`))
+      }
+      console.log(
+        chalk.blue(`Settings: Depth=${maxDepth}, Time Limit=${timeLimit}s, Max URLs=${maxUrls}`),
+      )
+
+      try {
+        // Gather company background information
+        const backgroundData = await gatherCompanyBackground(
+          company,
+          firecrawlApiKey,
+          googleApiKey,
+          {
+            maxDepth,
+            timeLimit,
+            maxUrls,
+            verbose,
+            companyContext,
+            peopleGuidance,
+          },
+        )
+
+        // Display research results
+        console.log(chalk.green('\n==== COMPANY BACKGROUND ====\n'))
+
+        // Display company name and URLs
+        console.log(chalk.cyan('Name:'), backgroundData.name)
+        console.log(chalk.cyan('Website:'), backgroundData.homepageUrl)
+        console.log(chalk.cyan('LinkedIn:'), backgroundData.linkedinUrl)
+        console.log('')
+
+        // Display product info
+        console.log(chalk.cyan('Product/Service:'))
+        console.log(backgroundData.productDescription)
+        console.log('')
+
+        // Display recent news
+        console.log(chalk.cyan('Recent News:'))
+        console.log(backgroundData.recentNews)
+        console.log('')
+
+        // Display funding info
+        console.log(chalk.cyan('Funding:'))
+        console.log(backgroundData.funding)
+        console.log('')
+
+        // Display key people
+        console.log(chalk.cyan(`Key People (${backgroundData.people.length}):`))
+        backgroundData.people.forEach((person, index) => {
+          console.log(`[${index + 1}] ${person.name} - ${person.role}`)
+          if (person.linkedinUrl) console.log(`    ${person.linkedinUrl}`)
+        })
+
+        // Save results to file if requested
+        if (outputPath) {
+          try {
+            // Convert to YAML and save
+            const yamlContent = yaml.dump(backgroundData, {
+              indent: 2,
+              lineWidth: 120,
+              noRefs: true,
+            })
+            fs.writeFileSync(outputPath, yamlContent, 'utf8')
+
+            console.log(chalk.green(`\nResults saved to: ${outputPath}`))
+          } catch (error: any) {
+            console.error(chalk.red(`Error saving results: ${error.message}`))
+          }
+        }
+      } catch (error: any) {
+        console.error(chalk.red('Error gathering company background:'), error.message)
+        process.exit(1)
+      }
     },
   )
   .command(
