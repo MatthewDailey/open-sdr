@@ -3,22 +3,25 @@ import { experimental_createMCPClient } from 'ai'
 import { type Tool } from 'ai'
 
 const mcpCommands = [
-  {
-    name: 'perplexity',
-    command: ['npx', '-y', 'server-perplexity-ask'],
-  },
-  {
-    name: 'notion',
-    command: ['npx', '-y', '@notionhq/notion-mcp-server'],
-  },
-  {
-    name: 'apify-web-scraper',
-    command: ['npx', '-y', '@apify/actors-mcp-server', '--actors', 'apify/web-scraper'],
-  },
+  ////////////////////////////////
+  // Used for the hackathon.
+  // {
+  //   name: 'perplexity',
+  //   command: ['npx', '-y', 'server-perplexity-ask'],
+  // },
+  // {
+  //   name: 'notion',
+  //   command: ['npx', '-y', '@notionhq/notion-mcp-server'],
+  // },
+  // {
+  //   name: 'apify-web-scraper',
+  //   command: ['npx', '-y', '@apify/actors-mcp-server', '--actors', 'apify/web-scraper'],
+  // },
   // {
   //   name: 'ref-tools',
   //   command: ['npx', '-y', 'ref-tools-mcp'],
   // },
+  ////////////////////////////////
   {
     name: 'rime',
     command: ['npx', '-y', 'rime-mcp'],
@@ -26,6 +29,10 @@ const mcpCommands = [
   {
     name: 'open-sdr',
     command: ['npx', '-y', 'mcp-remote@0.1.0-0', 'http://localhost:3000/api/mcp'],
+  },
+  {
+    name: 'firecrawl',
+    command: ['npx', '-y', 'firecrawl-mcp'],
   },
 ]
 
