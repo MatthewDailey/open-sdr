@@ -5,7 +5,7 @@
 
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
-import { SDR } from './linkedin'
+import { SDR } from './sdr'
 import { doAgentLoop } from './agent'
 import { startClientAndGetTools } from './mcp'
 import { createFirecrawlClient } from './firecrawl'
