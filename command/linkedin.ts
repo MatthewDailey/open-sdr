@@ -2,9 +2,13 @@
  * @fileoverview LinkedIn automation tools using Puppeteer.
  */
 
-import puppeteer, { type Cookie } from 'puppeteer'
+import { type Cookie } from 'puppeteer'
+import puppeteer from 'puppeteer-extra'
+import StealthPlugin from 'puppeteer-extra-plugin-stealth'
 import fs from 'fs'
 import path from 'path'
+
+puppeteer.use(StealthPlugin())
 
 export type Profile = {
   name: string

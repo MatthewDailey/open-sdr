@@ -34,7 +34,7 @@ company_background(company or tool name) -> deep research + structured extract
 [x] try openai deep research
   [x] try on big prompt -> slow, and manual means less interesting to build
   [x] try single company -> actually less useful than firecrawl version 
-[] add puppeteer stealth mode
+[x] add puppeteer stealth mode
 [] generalize Linkedin.findConnectionsAt(companyName) 
 [] SDR.gatherCompanyBackground(companyName)
 [] LinkedIn.findConnectionsToPerson(personName)
