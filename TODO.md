@@ -36,6 +36,8 @@ company_background(company or tool name) -> deep research + structured extract
   [x] try single company -> actually less useful than firecrawl version 
 [x] add puppeteer stealth mode
 [] generalize Linkedin.findConnectionsAt(companyName) 
+  [] extract linkedinurls
+  [] screenshot and have gemini return the names and roles + the link as an object
 [] SDR.gatherCompanyBackground(companyName)
 [] LinkedIn.findConnectionsToPerson(personName)
 [] add a 'list-tools' cli command
@@ -52,3 +54,4 @@ company_background(company or tool name) -> deep research + structured extract
   [] generate landing page (simpleanalytics)
   [] update commands to `sdr` and `server`
   [] delete the hackathon web app
+  [] setup steps: firecrawl, gemini, anthropic

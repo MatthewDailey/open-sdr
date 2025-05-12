@@ -7,6 +7,7 @@ import puppeteer from 'puppeteer-extra'
 import StealthPlugin from 'puppeteer-extra-plugin-stealth'
 import fs from 'fs'
 import path from 'path'
+import { cleanUrlQueryParams } from '../utils/url'
 
 puppeteer.use(StealthPlugin())
 
@@ -88,9 +89,9 @@ export class LinkedIn {
     const networkParam = degree === 'first' ? 'F' : 'S'
 
     const browser = await puppeteer.launch({
-      headless: false,
-      defaultViewport: null,
-      args: ['--start-maximized'],
+      headless: true,
+      defaultViewport: { width: 1280, height: 800 },
+      args: ['--window-size=1280,800'],
     })
 
     const page = await browser.newPage()
@@ -121,44 +122,43 @@ export class LinkedIn {
       await page.goto(searchUrl, { waitUntil: 'load' })
       await new Promise((resolve) => setTimeout(resolve, 5000))
 
+      // Take a screenshot and save it with the company name
+      const screenshotFilename = `${companyName.replace(/\s+/g, '_')}_connections.png`
+      await page.screenshot({
+        path: path.join('search_screenshots', screenshotFilename),
+        fullPage: true,
+      })
+      console.log(`Screenshot saved to ${screenshotFilename}`)
+
       console.log('Browser open with search results. Close the browser when finished.')
 
       const profiles: Profile[] = await page.evaluate(() => {
         const results: Profile[] = []
-        const profileElements = document.querySelectorAll('li.deTwLLJFmdvJifHRZrsREabuKckpkYE')
 
-        profileElements.forEach((el) => {
-          // Get the name from the profile, looking for the name element with the specific structure
-          const nameElement = el.querySelector(
-            '.BxdjqmEosQywVSBbjvSsYuWJfSVpXnYNOSlU span[aria-hidden="true"]',
-          )
-          const name = nameElement?.textContent?.trim() ?? ''
+        // Find all links on the page that match LinkedIn profile URLs
+        const profileLinks = Array.from(document.querySelectorAll('a[href*="linkedin.com/in/"]'))
+          .map((link) => link.getAttribute('href'))
+          .filter((href) => href && href.match(/https:\/\/www\.linkedin\.com\/in\/[\w-]+/))
+          // Remove duplicates
+          .filter((href, index, self) => self.indexOf(href) === index) as string[]
 
-          // Get the role from the profile role element
-          const role =
-            el.querySelector('.QmHtvHCBOiVUdutUPDZihOIsguJlXpIDOWlyM')?.textContent?.trim() ?? ''
-
-          // Get the image from the presence-entity__image
-          const imageElement = el.querySelector('img.presence-entity__image')
-          const image = imageElement?.getAttribute('src') ?? ''
-
-          // Get the profile link
-          const profileLinkElement = el.querySelector(
-            'a.nuXDIvMbeMYWApPugutCOKmVhZzvTYUM[href*="linkedin.com/in"]',
-          )
-          const profileLink = profileLinkElement?.getAttribute('href') ?? ''
-
-          if (name && profileLink) {
-            results.push({
-              name,
-              role,
-              image,
-              profileLink,
-            })
-          }
+        // Create profile objects with just the links
+        // Other fields are empty as we're only collecting links now
+        profileLinks.forEach((profileLink) => {
+          results.push({
+            name: '',
+            role: '',
+            image: '',
+            profileLink,
+          })
         })
 
         return results
+      })
+
+      // Clean profile links by removing query parameters
+      profiles.forEach((profile) => {
+        profile.profileLink = cleanUrlQueryParams(profile.profileLink)
       })
 
       console.log(profiles)
