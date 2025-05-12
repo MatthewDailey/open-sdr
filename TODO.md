@@ -41,7 +41,9 @@ company_background(company or tool name) -> deep research + structured extract
 [] add a 'list-tools' cli command
 [] update mcp config to allow including only sepecific tools
 [] given a person, find people i know who know them
-[] rename "Chrome for Testing" to "Chrome for OpenSDR"
+[] niceties
+  [] rename "Chrome for Testing" to "Chrome for OpenSDR"
+  [] login cli should have nicer messaging
 [] MCP explorations
   [] write file tool to save results
   [] try adding an email enrichment service

@@ -68,8 +68,10 @@ export class LinkedIn {
       }, 5000)
 
       await browser.waitForTarget((target) => target.opener() === null, { timeout: 0 })
-    } catch (error) {
-      console.error('Error during LinkedIn login:', error)
+    } catch (error: any) {
+      if (!error?.message?.includes('Navigating frame was detached')) {
+        console.error('Error during LinkedIn login:', error)
+      }
     }
   }
 
