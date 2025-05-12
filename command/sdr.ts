@@ -106,6 +106,20 @@ export class SDR {
     } = {},
   ): Promise<SDRResult<CompanyBackground>> {
     const data = await gatherCompanyBackground(companyName, options)
+
+    let text = `==== COMPANY BACKGROUND ====\n\n`
+    text += `Name: ${data.name}\n`
+    text += `Website: ${data.homepageUrl}\n`
+    text += `LinkedIn: ${data.linkedinUrl}\n\n`
+    text += `Product/Service:\n${data.productDescription}\n\n`
+    text += `Recent News:\n${data.recentNews}\n\n`
+    text += `Funding:\n${data.funding}\n\n`
+    text += `Key People (${data.people.length}):\n`
+    data.people.forEach((person, index) => {
+      text += `[${index + 1}] ${person.name} - ${person.role}\n`
+      if (person.linkedinUrl) text += `    ${person.linkedinUrl}\n`
+    })
+
     return {
       text: `Company background for ${companyName}`,
       data,

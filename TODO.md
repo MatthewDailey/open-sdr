@@ -48,13 +48,16 @@ company_background(company or tool name) -> deep research + structured extract
 [x] update findConnectionsAt(degree=second) to use findConnectionsToPerson to find the warm intro for second connection
 [x] have research tools in SDR class and add to MCP
 [x] add all MCP tools
-[] have all SDR functions return objects and markdown answer
-[] loop over companies tool to ensure we hit every one
+[x] have all SDR functions return objects and markdown answer
+[] extract research tool
+[] loop over companies tool to ensure we hit every one 
+  - spawn a sub-agent per company with a command and then aggregates the results
 [] organize commands
   - `sdr login`
   - `sdr tools <command>` 
   - `sdr server`
   - `sdr agent <prompt file>`
+[] chat UX for `sdr agent`
 [] connect a golden path workflow
 [] update mcp config to allow including only sepecific tools for other servers
 [] open message link to person?

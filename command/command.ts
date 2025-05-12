@@ -10,7 +10,6 @@ import path from 'path'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import { doAgentLoop } from './agent'
-import { gatherCompanyBackground } from './background'
 import type { Activity } from './firecrawl'
 import { createFirecrawlClient } from './firecrawl'
 import { startClientAndGetTools } from './mcp'
@@ -159,78 +158,30 @@ yargs(hideBin(process.argv))
       const verbose = argv.verbose as boolean
       const outputPath = argv.output as string | undefined
 
-      console.log(chalk.blue(`Gathering background information for: ${company}`))
+      console.log(`Gathering background information for: ${company}`)
       if (companyContext) {
-        console.log(chalk.blue(`Company context: ${companyContext}`))
+        console.log(`Company context: ${companyContext}`)
       }
       if (peopleGuidance) {
-        console.log(chalk.blue(`People focus: ${peopleGuidance}`))
+        console.log(`People focus: ${peopleGuidance}`)
       }
-      console.log(
-        chalk.blue(`Settings: Depth=${maxDepth}, Time Limit=${timeLimit}s, Max URLs=${maxUrls}`),
-      )
+      console.log(`Settings: Depth=${maxDepth}, Time Limit=${timeLimit}s, Max URLs=${maxUrls}`)
 
-      try {
-        // Gather company background information
-        const backgroundData = await gatherCompanyBackground(company, {
-          maxDepth,
-          timeLimit,
-          maxUrls,
-          verbose,
-          companyContext,
-          peopleGuidance,
-        })
+      const sdr = new SDR()
+      const backgroundData = await sdr.gatherCompanyBackground(company, {
+        maxDepth,
+        timeLimit,
+        maxUrls,
+        verbose,
+        companyContext,
+        peopleGuidance,
+      })
 
-        // Display research results
-        console.log(chalk.green('\n==== COMPANY BACKGROUND ====\n'))
-
-        // Display company name and URLs
-        console.log(chalk.cyan('Name:'), backgroundData.name)
-        console.log(chalk.cyan('Website:'), backgroundData.homepageUrl)
-        console.log(chalk.cyan('LinkedIn:'), backgroundData.linkedinUrl)
-        console.log('')
-
-        // Display product info
-        console.log(chalk.cyan('Product/Service:'))
-        console.log(backgroundData.productDescription)
-        console.log('')
-
-        // Display recent news
-        console.log(chalk.cyan('Recent News:'))
-        console.log(backgroundData.recentNews)
-        console.log('')
-
-        // Display funding info
-        console.log(chalk.cyan('Funding:'))
-        console.log(backgroundData.funding)
-        console.log('')
-
-        // Display key people
-        console.log(chalk.cyan(`Key People (${backgroundData.people.length}):`))
-        backgroundData.people.forEach((person, index) => {
-          console.log(`[${index + 1}] ${person.name} - ${person.role}`)
-          if (person.linkedinUrl) console.log(`    ${person.linkedinUrl}`)
-        })
-
-        // Save results to file if requested
-        if (outputPath) {
-          try {
-            // Convert to YAML and save
-            const yamlContent = yaml.dump(backgroundData, {
-              indent: 2,
-              lineWidth: 120,
-              noRefs: true,
-            })
-            fs.writeFileSync(outputPath, yamlContent, 'utf8')
-
-            console.log(chalk.green(`\nResults saved to: ${outputPath}`))
-          } catch (error: any) {
-            console.error(chalk.red(`Error saving results: ${error.message}`))
-          }
-        }
-      } catch (error: any) {
-        console.error(chalk.red('Error gathering company background:'), error.message)
-        process.exit(1)
+      console.log(backgroundData.text)
+      // Save results to file if requested
+      if (outputPath) {
+        fs.writeFileSync(outputPath, backgroundData.text, 'utf8')
+        console.log(`\nResults saved to: ${outputPath}`)
       }
     },
   )
