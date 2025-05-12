@@ -50,20 +50,21 @@ company_background(company or tool name) -> deep research + structured extract
 [x] add all MCP tools
 [x] have all SDR functions return objects and markdown answer
 [] extract research tool
-[] loop over companies tool to ensure we hit every one 
-  - spawn a sub-agent per company with a command and then aggregates the results
 [] organize commands
   - `sdr login`
   - `sdr tools <command>` 
   - `sdr server`
   - `sdr agent <prompt file>`
-[] chat UX for `sdr agent`
+[] loop over companies tool to ensure we hit every one 
+  - spawn a sub-agent per company with a command and then aggregates the results
+[] test everything
 [] connect a golden path workflow
 [] update mcp config to allow including only sepecific tools for other servers
 [] open message link to person?
 [] niceties
   [] rename "Chrome for Testing" to "Chrome for OpenSDR"
   [] login cli should have nicer messaging
+  [] chat UX for `sdr agent`
 [] MCP explorations
   [] write file tool to save results (eg as csv)
   [] google sheets

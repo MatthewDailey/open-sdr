@@ -1,3 +1,7 @@
+/**
+ * @fileoverview This file defines the main App component for the OpenSDR client. It handles workflow selection, user input, interaction with the chat API, and rendering of responses including text, tool calls, and validation results. Key types include `ChatState`, `Workflow`, and `ValidationResult`, and the main function is `App`.
+ */
+
 import React, { useState, useRef, useEffect } from 'react'
 import ReactMarkdown from 'react-markdown'
 import * as Collapsible from '@radix-ui/react-collapsible'

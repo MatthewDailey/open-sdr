@@ -1,4 +1,8 @@
 /**
+ * @fileoverview This file provides URL utility functions. It includes `cleanUrlQueryParams`, which removes query parameters from a given URL string. The function utilizes the `URL` object for parsing.
+ */
+
+/**
  * Removes query parameters from a URL
  * @param url The URL to clean
  * @returns URL without query parameters

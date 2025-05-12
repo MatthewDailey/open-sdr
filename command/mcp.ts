@@ -1,3 +1,7 @@
+/**
+ * @fileoverview This file defines and starts MCP (Model Context Protocol) clients using `experimental_createMCPClient` and `StdioClientTransport` for a set of predefined commands. The `startClientAndGetTools` function creates clients, retrieves their `Tool` definitions, and returns a record of all tools, prefixed by the client name.
+ */
+
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 import { experimental_createMCPClient } from 'ai'
 import { type Tool } from 'ai'

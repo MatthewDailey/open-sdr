@@ -1,3 +1,7 @@
+/**
+ * @fileoverview This file defines the `doAgentLoop` function, which runs an AI agent loop using the Anthropic model with streaming responses and optional tool support. It utilizes the `StreamTextOnStepFinishCallback` and `OnTextChunkCallback` types for handling agent steps and text generation.
+ */
+
 import { anthropic } from '@ai-sdk/anthropic'
 import { streamText, type StreamTextOnStepFinishCallback, type ToolSet } from 'ai'
 

@@ -1,3 +1,7 @@
+/**
+ * @fileoverview This file is the main entry point for the React application. It renders the root `App` component into the 'root' DOM element using `ReactDOM.createRoot`. It also imports global styles.
+ */
+
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
