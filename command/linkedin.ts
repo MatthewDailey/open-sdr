@@ -5,9 +5,6 @@
 import puppeteer, { type Cookie } from 'puppeteer'
 import fs from 'fs'
 import path from 'path'
-import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import { z } from 'zod'
 
 export type Profile = {
   name: string
@@ -17,9 +14,9 @@ export type Profile = {
 }
 
 /**
- * Class for LinkedIn Sales Development Representative automation
+ * Class for LinkedIn automation
  */
-export class SDR {
+export class LinkedIn {
   private cookiesPath: string
 
   constructor(cookiesPath: string = path.join(process.cwd(), 'linkedin-cookies.json')) {
@@ -165,57 +162,6 @@ export class SDR {
       if (browser && browser.isConnected()) {
         await browser.close()
       }
-    }
-  }
-
-  /**
-   * Starts an MCP server as a background process using StreamableHTTPServerTransport
-   * @param port Port to run the server on
-   * @param tools Custom tools to register with the server
-   * @returns URL of the MCP server
-   */
-  async startMcpServer(): Promise<{ server: McpServer; transport: StreamableHTTPServerTransport }> {
-    try {
-      const server = new McpServer({
-        name: 'open-sdr',
-        version: '0.0.1',
-      })
-
-      server.tool(
-        'findLinkedinConnectionsAt',
-        'Find connections at a specific company with specified connection degree with LinkedIn',
-        {
-          companyName: z.string().describe('The company name to search for'),
-          degree: z.enum(['first', 'second']).describe('Connection degree (first or second)'),
-        },
-        async ({ companyName, degree }) => {
-          const profiles = await this.findConnectionsAt(companyName, degree)
-          return {
-            content: profiles.map((profile) => ({
-              type: 'text',
-              text: `LINKEDIN\nName: ${profile.name}\nRole: ${profile.role}\nImageURL: ${profile.image}\nProfile Link: ${profile.profileLink}`,
-            })),
-          }
-        },
-      )
-
-      const transport = new StreamableHTTPServerTransport({
-        sessionIdGenerator: undefined, // disables session management
-      })
-      await server.connect(transport)
-
-      // server.stdout?.on('data', (data) => {
-      //   console.log(`MCP Server: ${data}`)
-      // })
-
-      // server.stderr?.on('data', (data) => {
-      //   console.error(`MCP Server Error: ${data}`)
-      // })
-
-      return { server, transport }
-    } catch (error) {
-      console.error('Error starting MCP server:', error)
-      throw error
     }
   }
 }

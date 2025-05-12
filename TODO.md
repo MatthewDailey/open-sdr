@@ -42,6 +42,7 @@ company_background(company or tool name) -> deep research + structured extract
 [] generalize linkedin connection search
 [] given a person, find people i know who know them
 [] write file tool
+[] rename "Chrome for Testing" to "Chrome for OpenSDR"
 [] publishing
   [] generate landing page
   [] update commands to `sdr` and `server`
