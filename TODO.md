@@ -51,6 +51,7 @@ company_background(company or tool name) -> deep research + structured extract
   [] try adding an email enrichment service
   [] try adding store to notion (after allowing filter tools)
 [] publishing
+  [] read env from .env
   [] generate landing page (simpleanalytics)
   [] update commands to `sdr` and `server`
   [] delete the hackathon web app

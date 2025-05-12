@@ -3,17 +3,17 @@
  * for various SDR (Sales Development Representative) operations including an AI agent loop.
  */
 
-import yargs from 'yargs'
-import { hideBin } from 'yargs/helpers'
-import { SDR } from './sdr'
-import { doAgentLoop } from './agent'
-import { startClientAndGetTools } from './mcp'
-import { createFirecrawlClient } from './firecrawl'
-import type { Activity } from './firecrawl'
 import chalk from 'chalk'
 import fs from 'fs'
-import path from 'path'
 import yaml from 'js-yaml'
+import path from 'path'
+import yargs from 'yargs'
+import { hideBin } from 'yargs/helpers'
+import { doAgentLoop } from './agent'
+import type { Activity } from './firecrawl'
+import { createFirecrawlClient } from './firecrawl'
+import { startClientAndGetTools } from './mcp'
+import { SDR } from './sdr'
 
 yargs(hideBin(process.argv))
   .command('login', 'Login to LinkedIn and save cookies', {}, async (argv) => {
