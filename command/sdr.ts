@@ -8,6 +8,11 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { z } from 'zod'
 import { gatherCompanyBackground, type CompanyBackground } from './background.js'
 
+export type SDRResult<T> = {
+  text: string
+  data: T
+}
+
 /**
  * Class for Sales Development Representative automation
  */
@@ -34,8 +39,18 @@ export class SDR {
   async findConnectionsAtCompany(
     companyName: string,
     degree: 'first' | 'second',
-  ): Promise<Profile[]> {
-    return this.linkedin.findConnectionsAtCompany(companyName, degree)
+  ): Promise<SDRResult<Profile[]>> {
+    const data = await this.linkedin.findConnectionsAtCompany(companyName, degree)
+    let text = `Found ${data.length} ${degree} degree connections at ${companyName}`
+    if (data.length === 0) {
+      text = `No ${degree} degree connections found at ${companyName}`
+    } else {
+      text += `:\n${data.map((profile) => `* ${profile.name} (${profile.role} at ${profile.company}) - ${profile.profileUrl}`).join('\n')}`
+    }
+    return {
+      text,
+      data,
+    }
   }
 
   /**
@@ -43,19 +58,34 @@ export class SDR {
    * @param personName Name of the person to search for
    * @param companyName Company to search for
    */
-  async findMutualConnections(personName: string, companyName?: string): Promise<Profile[]> {
-    return this.linkedin.findMutualConnections(personName, companyName)
+  async findMutualConnections(
+    personName: string,
+    companyName?: string,
+  ): Promise<SDRResult<{ mutuals: Profile[]; person: Profile }>> {
+    const data = await this.linkedin.findMutualConnections(personName, companyName)
+    let text = `Found ${data.mutuals.length} mutual connections with ${data.person.name} (${data.person.role} at ${data.person.company}) ${data.person.profileUrl}`
+    if (data.mutuals.length === 0) {
+      text = `No mutual connections found with ${personName}`
+    } else {
+      text += `:\n${data.mutuals.map((profile) => `* ${profile.name} (${profile.role} at ${profile.company}) - ${profile.profileUrl}`).join('\n')}`
+    }
+    return {
+      text,
+      data,
+    }
   }
-
   /**
    * Find a profile by name and company
    * @param personName Name of the person to search for
    * @param companyName Company to search for
    */
-  async findProfile(personName: string, companyName?: string): Promise<Profile[]> {
-    return this.linkedin.findProfile(personName, companyName)
+  async findProfile(personName: string, companyName?: string): Promise<SDRResult<Profile>> {
+    const data = await this.linkedin.findProfile(personName, companyName)
+    return {
+      text: `Found: ${data.name} (${data.role} at ${data.company}) ${data.profileUrl}`,
+      data,
+    }
   }
-
   /**
    * Gather comprehensive background information about a company
    * @param companyName Name of the company to research

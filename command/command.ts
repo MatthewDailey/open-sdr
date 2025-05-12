@@ -44,7 +44,8 @@ yargs(hideBin(process.argv))
 
       console.log(`Searching for ${degree} degree connections at ${company}...`)
       const sdr = new SDR()
-      await sdr.findConnectionsAtCompany(company, degree)
+      const result = await sdr.findConnectionsAtCompany(company, degree)
+      console.log(result.text)
     },
   )
   .command(
@@ -71,18 +72,7 @@ yargs(hideBin(process.argv))
       )
       const sdr = new SDR()
       const connections = await sdr.findMutualConnections(person, company)
-
-      if (connections.length === 0) {
-        console.log(chalk.yellow('No mutual connections found.'))
-      } else {
-        console.log(chalk.green(`Found ${connections.length} mutual connections:`))
-        connections.forEach((profile, index) => {
-          console.log(chalk.blue(`\n[${index + 1}] ${profile.name}`))
-          console.log(`Role: ${profile.role || 'N/A'}`)
-          console.log(`Company: ${profile.company || 'N/A'}`)
-          console.log(`Profile URL: ${profile.profileUrl}`)
-        })
-      }
+      console.log(connections.text)
     },
   )
   .command(
@@ -106,19 +96,8 @@ yargs(hideBin(process.argv))
 
       console.log(`Searching for profile of ${person}${company ? ` at ${company}` : ''}...`)
       const sdr = new SDR()
-      const profiles = await sdr.findProfile(person, company)
-
-      if (profiles.length === 0) {
-        console.log(chalk.yellow('No profiles found.'))
-      } else {
-        console.log(chalk.green(`Found ${profiles.length} profiles:`))
-        profiles.forEach((profile, index) => {
-          console.log(chalk.blue(`\n[${index + 1}] ${profile.name}`))
-          console.log(`Role: ${profile.role || 'N/A'}`)
-          console.log(`Company: ${profile.company || 'N/A'}`)
-          console.log(`Profile URL: ${profile.profileUrl}`)
-        })
-      }
+      const profile = await sdr.findProfile(person, company)
+      console.log(profile.text)
     },
   )
   .command(

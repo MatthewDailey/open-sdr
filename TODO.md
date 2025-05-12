@@ -47,7 +47,7 @@ company_background(company or tool name) -> deep research + structured extract
   - open search and do same "open and get links" fn as findConnectionsAtd
 [x] update findConnectionsAt(degree=second) to use findConnectionsToPerson to find the warm intro for second connection
 [x] have research tools in SDR class and add to MCP
-[] add all MCP tools
+[x] add all MCP tools
 [] have all SDR functions return objects and markdown answer
 [] loop over companies tool to ensure we hit every one
 [] organize commands

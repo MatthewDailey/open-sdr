@@ -102,16 +102,12 @@ export class LinkedIn {
    * @param personName Name of the person to search for
    * @param companyName Company to search for
    */
-  async findProfile(personName: string, companyName?: string): Promise<Profile[]> {
+  async findProfile(personName: string, companyName?: string): Promise<Profile> {
     const query = companyName ? `${companyName} ${personName}` : personName
     const searchUrl = `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(query)}`
     const screenshotName = `${query.replace(/\s+/g, '_')}_person`
 
     const profileUrl = await this.withLinkedin(searchUrl, async (page) => {
-      // Wait for the search results to load
-      await page.waitForSelector('.search-results-container', { timeout: 10000 })
-
-      // Find the "View full profile" links
       const viewProfileLinks = await page.evaluate(() => {
         const links = Array.from(document.querySelectorAll('a'))
         return links
@@ -124,7 +120,6 @@ export class LinkedIn {
       })
 
       if (viewProfileLinks.length === 1) {
-        console.log(`Found exactly 1 "View full profile" link`)
         return viewProfileLinks[0]
       } else {
         return null
@@ -132,13 +127,18 @@ export class LinkedIn {
     })
 
     if (profileUrl && typeof profileUrl === 'string') {
-      return [{ name: personName, profileUrl, role: '', company: '' }]
+      return { name: personName, profileUrl, role: '', company: '' }
     }
 
     const profiles = await this.extractProfilesFromLinkedin(searchUrl, screenshotName)
-    return profiles.filter((profile) =>
+    const nameMatchingProfile = profiles.filter((profile) =>
       profile.name.toLowerCase().includes(personName.toLowerCase()),
-    )
+    )[0]
+    if (nameMatchingProfile) {
+      return nameMatchingProfile
+    }
+
+    throw new Error(`No profile found for ${personName}`)
   }
 
   /**
@@ -146,12 +146,12 @@ export class LinkedIn {
    * @param personName Name of the person to search for
    * @param companyName Company to search for
    */
-  async findMutualConnections(personName: string, companyName?: string): Promise<Profile[]> {
-    const profile = await this.findProfile(personName, companyName)
-    if (profile.length === 0) {
-      return []
-    }
-    const profileUrl = profile[0].profileUrl
+  async findMutualConnections(
+    personName: string,
+    companyName?: string,
+  ): Promise<{ mutuals: Profile[]; person: Profile }> {
+    const person = await this.findProfile(personName, companyName)
+    const profileUrl = person.profileUrl
 
     const mutualConnectionsUrl = await this.withLinkedin<string | null>(
       profileUrl,
@@ -174,24 +174,24 @@ export class LinkedIn {
     )
 
     if (mutualConnectionsUrl && typeof mutualConnectionsUrl === 'string') {
-      return this.extractProfilesFromLinkedin(
+      const mutuals = await this.extractProfilesFromLinkedin(
         mutualConnectionsUrl,
         `${personName.replace(/\s+/g, '_')}_mutual_connections`,
       )
+      return { mutuals, person }
     }
 
-    return []
+    return { mutuals: [], person }
   }
 
   private async extractProfilesFromLinkedin(url: string, name: string): Promise<Profile[]> {
     return await this.withLinkedin(url, async (page) => {
-      // Take a screenshot and save it with the company name
       const screenshotPath = path.join(process.cwd(), 'search_screenshots', `${name}.png`)
       await page.screenshot({
         path: screenshotPath,
         fullPage: true,
       })
-      console.log(`Search results screenshot saved to ${screenshotPath}`)
+      // console.log(`Search results screenshot saved to ${screenshotPath}`)
 
       const profileUrls: string[] = (
         await page.evaluate(() => {
@@ -215,7 +215,6 @@ export class LinkedIn {
         screenshotPath,
       )
 
-      console.log(profiles)
       return profiles
     })
   }
