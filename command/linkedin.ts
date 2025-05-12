@@ -2,7 +2,7 @@
  * @fileoverview LinkedIn automation tools using Puppeteer.
  */
 
-import { type Cookie } from 'puppeteer'
+import { Page, type Cookie } from 'puppeteer'
 import puppeteer from 'puppeteer-extra'
 import StealthPlugin from 'puppeteer-extra-plugin-stealth'
 import fs from 'fs'
@@ -92,7 +92,101 @@ export class LinkedIn {
   ): Promise<Profile[]> {
     // Network parameter is "F" for first-degree connections, "S" for second-degree
     const networkParam = degree === 'first' ? 'F' : 'S'
+    const searchUrl = `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(companyName)}&network=["${networkParam}"]`
+    const screenshotName = `${companyName.replace(/\s+/g, '_')}_connections`
+    return this.extractProfilesFromLinkedin(searchUrl, screenshotName)
+  }
 
+  /**
+   * Find a profile by name and company
+   * @param personName Name of the person to search for
+   * @param companyName Company to search for
+   */
+  async findProfile(personName: string, companyName?: string): Promise<Profile[]> {
+    const query = personName + ' ' + companyName
+    const searchUrl = `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(query)}`
+    const screenshotName = `${query.replace(/\s+/g, '_')}_person`
+    return this.extractProfilesFromLinkedin(searchUrl, screenshotName)
+  }
+
+  /**
+   * Find people I know that know a person
+   * @param personName Name of the person to search for
+   * @param companyName Company to search for
+   */
+  async findConnectionsToPerson(personName: string, companyName?: string): Promise<Profile[]> {
+    const profile = await this.findProfile(personName, companyName)
+    if (profile.length === 0) {
+      return []
+    }
+    const profileUrl = profile[0].profileUrl
+
+    const mutualConnectionsUrl = await this.withLinkedin<string | null>(
+      profileUrl,
+      async (page) => {
+        return await page.evaluate(() => {
+          const links = Array.from(document.querySelectorAll('a[href*="facetNetwork"]'))
+          for (const link of links) {
+            const href = link.getAttribute('href')
+            if (
+              href &&
+              href.includes('facetNetwork=%22F%22') &&
+              href.includes('facetConnectionOf=')
+            ) {
+              return href
+            }
+          }
+          return null
+        })
+      },
+    )
+
+    if (mutualConnectionsUrl && typeof mutualConnectionsUrl === 'string') {
+      return this.extractProfilesFromLinkedin(
+        mutualConnectionsUrl,
+        `${personName.replace(/\s+/g, '_')}_mutual_connections`,
+      )
+    }
+
+    return []
+  }
+
+  private async extractProfilesFromLinkedin(url: string, name: string): Promise<Profile[]> {
+    return await this.withLinkedin(url, async (page) => {
+      // Take a screenshot and save it with the company name
+      const screenshotPath = path.join(process.cwd(), 'search_screenshots', `${name}.png`)
+      await page.screenshot({
+        path: screenshotPath,
+        fullPage: true,
+      })
+      console.log(`Search results screenshot saved to ${screenshotPath}`)
+
+      const profileUrls: string[] = await page.evaluate(() => {
+        const results: string[] = []
+        const profileLinks = Array.from(document.querySelectorAll('a[href*="linkedin.com/in/"]'))
+          .map((link) => link.getAttribute('href'))
+          .filter((href) => href && href.match(/https:\/\/www\.linkedin\.com\/in\/[\w-]+/))
+          .filter((href, index, self) => self.indexOf(href) === index) as string[]
+        profileLinks.forEach((profileUrl) => {
+          results.push(profileUrl)
+        })
+        return results
+      })
+
+      const google = new GoogleAI()
+      const profiles = await google.generateStructuredData(
+        'Here is a screenshot of a LinkedIn search results page and some urls that appear on that page. Match the urls to the profiles in the screenshot. Return a list of profiles with the following fields: name, role, company, profileUrl. If a url does not match any profile in the screenshot, do not include it in the list. The role is typically on the line in line "Current: <role> at <company>", only include the role. \n\n' +
+          profileUrls.map(cleanUrlQueryParams).join('\n'),
+        z.array(ProfileSchema),
+        screenshotPath,
+      )
+
+      console.log(profiles)
+      return profiles
+    })
+  }
+
+  private async withLinkedin<T>(url: string, fn: (page: Page) => Promise<T>) {
     const browser = await puppeteer.launch({
       headless: true,
       defaultViewport: { width: 1280, height: 800 },
@@ -102,7 +196,6 @@ export class LinkedIn {
     const page = await browser.newPage()
 
     try {
-      // Load cookies if they exist
       if (fs.existsSync(this.cookiesPath)) {
         try {
           const cookiesStr = fs.readFileSync(this.cookiesPath, 'utf8')
@@ -118,64 +211,12 @@ export class LinkedIn {
         return []
       }
 
-      // Construct the search URL
-      const searchUrl = `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(companyName)}&network=["${networkParam}"]`
-
-      // console.log(`Finding ${degree} degree connections at ${companyName}...`)
-      // console.log(`Navigating to: ${searchUrl}`)
-
-      await page.goto(searchUrl, { waitUntil: 'load' })
+      await page.goto(url, { waitUntil: 'load' })
       await new Promise((resolve) => setTimeout(resolve, 5000))
 
-      // Take a screenshot and save it with the company name
-      const screenshotPath = path.join(
-        process.cwd(),
-        'search_screenshots',
-        `${companyName.replace(/\s+/g, '_')}_connections.png`,
-      )
-      await page.screenshot({
-        path: screenshotPath,
-        fullPage: true,
-      })
-      console.log(`Search results screenshot saved to ${screenshotPath}`)
-
-      const profileUrls: string[] = await page.evaluate(() => {
-        const results: string[] = []
-
-        // Find all links on the page that match LinkedIn profile URLs
-        const profileLinks = Array.from(document.querySelectorAll('a[href*="linkedin.com/in/"]'))
-          .map((link) => link.getAttribute('href'))
-          .filter((href) => href && href.match(/https:\/\/www\.linkedin\.com\/in\/[\w-]+/))
-          // Remove duplicates
-          .filter((href, index, self) => self.indexOf(href) === index) as string[]
-
-        // Create profile objects with just the links
-        // Other fields are empty as we're only collecting links now
-        profileLinks.forEach((profileUrl) => {
-          results.push(profileUrl)
-        })
-
-        return results
-      })
-
-      const google = new GoogleAI()
-      const profiles = await google.generateStructuredData(
-        'Here is a screenshot of a LinkedIn search results page and some urls that appear on that page. Match the urls to the profiles in the screenshot. Return a list of profiles with the following fields: name, role, company, profileUrl. If a url does not match any profile in the screenshot, do not include it in the list. The role is typically on the line in line "Current: <role> at <company>", only include the role. \n\n' +
-          profileUrls.map(cleanUrlQueryParams).join('\n'),
-        z.array(ProfileSchema),
-        screenshotPath,
-      )
-
-      console.log(profiles)
-
-      return profiles
-    } catch (error) {
-      console.error(`Error finding connections at ${companyName}:`, error)
-      return []
+      return await fn(page)
     } finally {
-      if (browser && browser.isConnected()) {
-        await browser.close()
-      }
+      await browser.close()
     }
   }
 }

@@ -41,7 +41,12 @@ company_background(company or tool name) -> deep research + structured extract
    [x] allow company context (eg ai tool builders)
    [x] allow people guidance (eg types of people to look for)
    [x] remove company size
-[] LinkedIn.findConnectionsToPerson(personName) - 
+[] LinkedIn.findConnectionsToPerson(personName, companyName?) 
+  - https://www.linkedin.com/search/results/people/?keywords=<name> <company name> -> scrape linkedin url
+  - copy and open search link https://www.linkedin.com/search/results/people/?facetNetwork=%22F%22&facetConnectionOf=%22ACoAACQesNsB19Z7ZTj7LiGKB3bUqp6GBbo6TbQ%22&origin=MEMBER_PROFILE_CANNED_SEARCH&lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base%3B1kJrr3YxQ%2FOwrzzN1FrKfg%3D%3D
+  - open search and do same "open and get links" fn as findConnectionsAtd
+[] update findConnectionsAt(degree=second) to use findConnectionsToPerson to find the warm intro for second connection
+[] connect a golden path workflow
 [] add a 'list-tools' cli command
 [] update mcp config to allow including only sepecific tools
 [] given a person, find people i know who know them
