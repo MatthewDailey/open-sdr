@@ -44,7 +44,81 @@ yargs(hideBin(process.argv))
 
       console.log(`Searching for ${degree} degree connections at ${company}...`)
       const sdr = new SDR()
-      await sdr.findConnectionsAt(company, degree)
+      await sdr.findConnectionsAtCompany(company, degree)
+    },
+  )
+  .command(
+    'mutuals <person>',
+    'Find mutual connections with a person on LinkedIn',
+    (yargs) => {
+      return yargs
+        .positional('person', {
+          describe: 'The person name to search for',
+          type: 'string',
+          demandOption: true,
+        })
+        .option('company', {
+          describe: 'Optional company name to filter results',
+          type: 'string',
+        })
+    },
+    async (argv) => {
+      const person = argv.person as string
+      const company = argv.company as string | undefined
+
+      console.log(
+        `Searching for mutual connections with ${person}${company ? ` at ${company}` : ''}...`,
+      )
+      const sdr = new SDR()
+      const connections = await sdr.findMutualConnections(person, company)
+
+      if (connections.length === 0) {
+        console.log(chalk.yellow('No mutual connections found.'))
+      } else {
+        console.log(chalk.green(`Found ${connections.length} mutual connections:`))
+        connections.forEach((profile, index) => {
+          console.log(chalk.blue(`\n[${index + 1}] ${profile.name}`))
+          console.log(`Role: ${profile.role || 'N/A'}`)
+          console.log(`Company: ${profile.company || 'N/A'}`)
+          console.log(`Profile URL: ${profile.profileUrl}`)
+        })
+      }
+    },
+  )
+  .command(
+    'profile <person>',
+    'Find a LinkedIn profile by name',
+    (yargs) => {
+      return yargs
+        .positional('person', {
+          describe: 'The person name to search for',
+          type: 'string',
+          demandOption: true,
+        })
+        .option('company', {
+          describe: 'Optional company name to filter results',
+          type: 'string',
+        })
+    },
+    async (argv) => {
+      const person = argv.person as string
+      const company = argv.company as string | undefined
+
+      console.log(`Searching for profile of ${person}${company ? ` at ${company}` : ''}...`)
+      const sdr = new SDR()
+      const profiles = await sdr.findProfile(person, company)
+
+      if (profiles.length === 0) {
+        console.log(chalk.yellow('No profiles found.'))
+      } else {
+        console.log(chalk.green(`Found ${profiles.length} profiles:`))
+        profiles.forEach((profile, index) => {
+          console.log(chalk.blue(`\n[${index + 1}] ${profile.name}`))
+          console.log(`Role: ${profile.role || 'N/A'}`)
+          console.log(`Company: ${profile.company || 'N/A'}`)
+          console.log(`Profile URL: ${profile.profileUrl}`)
+        })
+      }
     },
   )
   .command(

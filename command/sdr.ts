@@ -30,8 +30,29 @@ export class SDR {
    * @param companyName Company to search for
    * @param degree Connection degree (first or second)
    */
-  async findConnectionsAt(companyName: string, degree: 'first' | 'second'): Promise<Profile[]> {
+  async findConnectionsAtCompany(
+    companyName: string,
+    degree: 'first' | 'second',
+  ): Promise<Profile[]> {
     return this.linkedin.findConnectionsAtCompany(companyName, degree)
+  }
+
+  /**
+   * Find mutual connections between two people
+   * @param personName Name of the person to search for
+   * @param companyName Company to search for
+   */
+  async findMutualConnections(personName: string, companyName?: string): Promise<Profile[]> {
+    return this.linkedin.findMutualConnections(personName, companyName)
+  }
+
+  /**
+   * Find a profile by name and company
+   * @param personName Name of the person to search for
+   * @param companyName Company to search for
+   */
+  async findProfile(personName: string, companyName?: string): Promise<Profile[]> {
+    return this.linkedin.findProfile(personName, companyName)
   }
 
   /**
@@ -53,7 +74,7 @@ export class SDR {
           degree: z.enum(['first', 'second']).describe('Connection degree (first or second)'),
         },
         async ({ companyName, degree }) => {
-          const profiles = await this.findConnectionsAt(companyName, degree)
+          const profiles = await this.findConnectionsAtCompany(companyName, degree)
           return {
             content: profiles.map((profile) => ({
               type: 'text',

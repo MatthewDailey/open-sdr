@@ -103,10 +103,42 @@ export class LinkedIn {
    * @param companyName Company to search for
    */
   async findProfile(personName: string, companyName?: string): Promise<Profile[]> {
-    const query = personName + ' ' + companyName
+    const query = companyName ? `${companyName} ${personName}` : personName
     const searchUrl = `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(query)}`
     const screenshotName = `${query.replace(/\s+/g, '_')}_person`
-    return this.extractProfilesFromLinkedin(searchUrl, screenshotName)
+
+    const profileUrl = await this.withLinkedin(searchUrl, async (page) => {
+      // Wait for the search results to load
+      await page.waitForSelector('.search-results-container', { timeout: 10000 })
+
+      // Find the "View full profile" links
+      const viewProfileLinks = await page.evaluate(() => {
+        const links = Array.from(document.querySelectorAll('a'))
+        return links
+          .filter((link) => {
+            const text = link.textContent?.trim()
+            return text === 'View full profile'
+          })
+          .map((link) => link.getAttribute('href'))
+          .filter((href) => href !== null) as string[]
+      })
+
+      if (viewProfileLinks.length === 1) {
+        console.log(`Found exactly 1 "View full profile" link`)
+        return viewProfileLinks[0]
+      } else {
+        return null
+      }
+    })
+
+    if (profileUrl && typeof profileUrl === 'string') {
+      return [{ name: personName, profileUrl, role: '', company: '' }]
+    }
+
+    const profiles = await this.extractProfilesFromLinkedin(searchUrl, screenshotName)
+    return profiles.filter((profile) =>
+      profile.name.toLowerCase().includes(personName.toLowerCase()),
+    )
   }
 
   /**
@@ -114,7 +146,7 @@ export class LinkedIn {
    * @param personName Name of the person to search for
    * @param companyName Company to search for
    */
-  async findConnectionsToPerson(personName: string, companyName?: string): Promise<Profile[]> {
+  async findMutualConnections(personName: string, companyName?: string): Promise<Profile[]> {
     const profile = await this.findProfile(personName, companyName)
     if (profile.length === 0) {
       return []
@@ -161,22 +193,24 @@ export class LinkedIn {
       })
       console.log(`Search results screenshot saved to ${screenshotPath}`)
 
-      const profileUrls: string[] = await page.evaluate(() => {
-        const results: string[] = []
-        const profileLinks = Array.from(document.querySelectorAll('a[href*="linkedin.com/in/"]'))
-          .map((link) => link.getAttribute('href'))
-          .filter((href) => href && href.match(/https:\/\/www\.linkedin\.com\/in\/[\w-]+/))
-          .filter((href, index, self) => self.indexOf(href) === index) as string[]
-        profileLinks.forEach((profileUrl) => {
-          results.push(profileUrl)
+      const profileUrls: string[] = (
+        await page.evaluate(() => {
+          const results: string[] = []
+          const profileLinks = Array.from(document.querySelectorAll('a[href*="linkedin.com/in/"]'))
+            .map((link) => link.getAttribute('href'))
+            .filter((href) => href && href.match(/https:\/\/www\.linkedin\.com\/in\/[\w-]+/))
+            .filter((href, index, self) => self.indexOf(href) === index) as string[]
+          profileLinks.forEach((profileUrl) => {
+            results.push(profileUrl)
+          })
+          return results
         })
-        return results
-      })
+      ).map(cleanUrlQueryParams)
 
       const google = new GoogleAI()
       const profiles = await google.generateStructuredData(
         'Here is a screenshot of a LinkedIn search results page and some urls that appear on that page. Match the urls to the profiles in the screenshot. Return a list of profiles with the following fields: name, role, company, profileUrl. If a url does not match any profile in the screenshot, do not include it in the list. The role is typically on the line in line "Current: <role> at <company>", only include the role. \n\n' +
-          profileUrls.map(cleanUrlQueryParams).join('\n'),
+          profileUrls.join('\n'),
         z.array(ProfileSchema),
         screenshotPath,
       )
