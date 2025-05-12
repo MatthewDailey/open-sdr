@@ -31,7 +31,7 @@ export class SDR {
    * @param degree Connection degree (first or second)
    */
   async findConnectionsAt(companyName: string, degree: 'first' | 'second'): Promise<Profile[]> {
-    return this.linkedin.findConnectionsAt(companyName, degree)
+    return this.linkedin.findConnectionsAtCompany(companyName, degree)
   }
 
   /**

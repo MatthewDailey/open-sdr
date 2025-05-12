@@ -34,16 +34,19 @@ company_background(company or tool name) -> deep research + structured extract
 [x] try openai deep research
   [x] try on big prompt -> slow, and manual means less interesting to build
   [x] try single company -> actually less useful than firecrawl version 
-[] SDR.gatherCompanyBackground(companyName)
-[] SDR.findConnectionsToPerson(personName)
 [] add puppeteer stealth mode
+[] generalize Linkedin.findConnectionsAt(companyName) 
+[] SDR.gatherCompanyBackground(companyName)
+[] LinkedIn.findConnectionsToPerson(personName)
 [] add a 'list-tools' cli command
 [] update mcp config to allow including only sepecific tools
-[] generalize linkedin connection search
 [] given a person, find people i know who know them
-[] write file tool
 [] rename "Chrome for Testing" to "Chrome for OpenSDR"
+[] MCP explorations
+  [] write file tool to save results
+  [] try adding an email enrichment service
+  [] try adding store to notion (after allowing filter tools)
 [] publishing
-  [] generate landing page
+  [] generate landing page (simpleanalytics)
   [] update commands to `sdr` and `server`
   [] delete the hackathon web app

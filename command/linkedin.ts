@@ -74,7 +74,10 @@ export class LinkedIn {
    * @param companyName Company to search for
    * @param degree Connection degree (first or second)
    */
-  async findConnectionsAt(companyName: string, degree: 'first' | 'second'): Promise<Profile[]> {
+  async findConnectionsAtCompany(
+    companyName: string,
+    degree: 'first' | 'second',
+  ): Promise<Profile[]> {
     // Network parameter is "F" for first-degree connections, "S" for second-degree
     const networkParam = degree === 'first' ? 'F' : 'S'
 
