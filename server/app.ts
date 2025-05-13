@@ -99,7 +99,10 @@ export async function createApp() {
     const tools = await getToolsLazy()
 
     doAgentLoop(
-      prompt,
+      {
+        system: 'You are a helpful assistant that can use tools to help the user.',
+        user: prompt,
+      },
       (step) => {
         if (step.toolCalls && step.toolCalls.length > 0) {
           for (let i = 0; i < step.toolCalls.length; i++) {

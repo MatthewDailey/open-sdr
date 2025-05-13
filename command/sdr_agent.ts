@@ -13,13 +13,15 @@ import { startClientAndGetTools } from './mcp'
  */
 export async function runSdrAgent(prompt: string): Promise<void> {
   try {
-    // Load MCP tools before starting the agent loop
     console.log('Loading MCP tools...')
     const { tools } = await startClientAndGetTools()
     console.log('MCP tools loaded successfully.')
 
     await doAgentLoop(
-      prompt,
+      {
+        system: 'You are a helpful assistant that can use tools to help the user.',
+        user: prompt,
+      },
       (step) => {
         // Handle tool calls with a nice representation
         if (step.toolCalls.length > 0) {

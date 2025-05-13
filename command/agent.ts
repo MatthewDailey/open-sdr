@@ -20,7 +20,7 @@ type OnTextChunkCallback = (chunk: string) => void | Promise<void>
  * @returns The complete text response from the agent
  */
 export async function doAgentLoop(
-  prompt: string,
+  prompt: { system: string; user: string },
   onStep?: StreamTextOnStepFinishCallback<ToolSet>,
   onTextChunk?: OnTextChunkCallback,
   tools: ToolSet = {},
@@ -31,7 +31,8 @@ export async function doAgentLoop(
   console.log('Tools:', tools)
   const { textStream, fullStream } = streamText({
     model: anthropic('claude-3-5-sonnet-latest'),
-    prompt,
+    system: prompt.system,
+    prompt: prompt.user,
     tools,
     maxSteps: steps,
     onStepFinish: onStep,
