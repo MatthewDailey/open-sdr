@@ -55,18 +55,18 @@ company_background(company or tool name) -> deep research + structured extract
   - `sdr tools <command>` 
   - `sdr server`
   - `sdr agent <prompt file>`
-[] loop over companies tool to ensure we hit every one 
+[x] loop over companies tool to ensure we hit every one 
   - spawn a sub-agent per company with a command and then aggregates the results
 [] test everything
 [] connect a golden path workflow
-[] update mcp config to allow including only sepecific tools for other servers
-[] open message link to person?
 [] niceties
+  [] open message link to person?
+  [] update mcp config to allow including only sepecific tools for other servers
   [] rename "Chrome for Testing" to "Chrome for OpenSDR"
   [] login cli should have nicer messaging
   [] chat UX for `sdr agent`
 [] MCP explorations
-  [] write file tool to save results (eg as csv)
+  [x] write file tool to save results (eg as csv)
   [] google sheets
   [] try adding an email enrichment service
   [] try adding store to notion (after allowing filter tools)

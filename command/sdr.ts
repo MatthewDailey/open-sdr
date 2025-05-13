@@ -9,6 +9,7 @@ import { z } from 'zod'
 import { gatherCompanyBackground, type CompanyBackground } from './background.js'
 import { createFirecrawlClient, type Activity, type DeepResearchData } from './firecrawl.js'
 import { runSdrAgentOnEachCompany, type SDRAgentResult } from './sdr_agent'
+import { writeMarkdown, type WriteMarkdownResult } from '../utils/write'
 
 export type SDRResult<T> = {
   text: string
@@ -345,6 +346,33 @@ export class SDR {
               {
                 type: 'text',
                 text: result.text,
+              },
+            ],
+          }
+        },
+      )
+
+      server.tool(
+        'writeSdrNotes',
+        'Write markdown content to a file in the SDR notes directory. This should be used for the agent to output a summary of its work or when requested to save a file.',
+        {
+          content: z.string().describe('The markdown content to write to the file'),
+          filename: z
+            .string()
+            .optional()
+            .describe('Optional filename (without extension) to use for the file'),
+          subdirectory: z
+            .string()
+            .optional()
+            .describe('Optional subdirectory within SDR notes to store the file'),
+        },
+        async ({ content, filename, subdirectory }) => {
+          const result = await writeMarkdown(content, { filename, subdirectory })
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `Successfully wrote markdown to file: ${result.filePath}`,
               },
             ],
           }
