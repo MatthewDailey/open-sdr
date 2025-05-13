@@ -25,6 +25,8 @@ export async function runSdrAgent(
   prompt: string,
   options: { logToConsole: boolean },
 ): Promise<SDRAgentResult> {
+  console.log('Starting SDR agent with prompt:\n```\n', prompt, '\n```\n\n')
+
   let chatLog = ''
 
   try {
