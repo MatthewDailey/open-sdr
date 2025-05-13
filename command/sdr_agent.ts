@@ -37,7 +37,8 @@ export async function runSdrAgent(
     Object.assign(tools, sdrTools)
     await doAgentLoop(
       {
-        system: 'You are a helpful assistant that can use tools to help the user.',
+        system:
+          'You are a helpful assistant that can use tools to help the user. You are given a task and complete that without a conversation or asking questions.',
         user: prompt,
       },
       (step) => {
