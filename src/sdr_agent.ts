@@ -57,23 +57,25 @@ export async function runSdrAgent(
               if (options.logToConsole) console.log(argLogEntry.trim())
             }
 
-            const resultHeader = '\n======  Result  ======\n'
-            chatLog += resultHeader
-            if (options.logToConsole) console.log(resultHeader.trim())
+            if (toolResult) {
+              const resultHeader = '\n======  Result  ======\n'
+              chatLog += resultHeader
+              if (options.logToConsole) console.log(resultHeader.trim())
 
-            if (toolResult.result && typeof toolResult.result === 'string') {
-              const resultStr = toolResult.result + '\n'
-              chatLog += resultStr
-              if (options.logToConsole) console.log(resultStr.trim())
-            } else {
-              const resultJson = JSON.stringify(toolResult, null, 2) + '\n'
-              chatLog += resultJson
-              if (options.logToConsole) console.log(resultJson.trim())
+              if (toolResult.result && typeof toolResult.result === 'string') {
+                const resultStr = toolResult.result + '\n'
+                chatLog += resultStr
+                if (options.logToConsole) console.log(resultStr.trim())
+              } else {
+                const resultJson = JSON.stringify(toolResult, null, 2) + '\n'
+                chatLog += resultJson
+                if (options.logToConsole) console.log(resultJson.trim())
+              }
+
+              const separator = '=====================\n\n'
+              chatLog += separator
+              if (options.logToConsole) console.log(separator.trim())
             }
-
-            const separator = '=====================\n\n'
-            chatLog += separator
-            if (options.logToConsole) console.log(separator.trim())
           }
         }
       },

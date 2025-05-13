@@ -74,10 +74,11 @@ company_background(company or tool name) -> deep research + structured extract
 
 [] publishing
   [x] read env from .env (implemented, validate this)
-  [] add binary for global install
+  [x] add binary for global install
   [x] delete the hackathon web app
   [x] move my prompts to sample prompt area
   [x] unify tool definitions (try result: string from MCP ones with claude)
+  [] fix `npm warn` issues on install
 [] login cli should have nicer messaging (eg you're now logged in)
   - hit enter to open linkedin in a browser to login, this is th browser that open-sdr will use. 
   - when done, close the browser
@@ -99,6 +100,7 @@ content:
 [] list of tools provided (visual between these?)
 [] landing page og: tags that work
 [] note about test browser
+[] visual agent architecture about spawning sub agents per company
 
 stretch
 [] chat UX for `sdr agent`
