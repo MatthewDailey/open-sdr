@@ -83,8 +83,8 @@ export class SDR {
         message: z.string().describe('Message text to draft'),
       },
       execute: async function (this: SDR, { profileUrl, message }) {
-        await this.draftMessage(profileUrl, message)
-        return 'Opening draft message to ' + profileUrl + ' with message: ' + message
+        this.draftMessage(profileUrl, message)
+        return 'Opening browser tab to draft message to ' + profileUrl + ' with message: ' + message
       },
     },
     {
@@ -243,10 +243,17 @@ export class SDR {
    * @param message Message to draft
    */
   async draftMessage(profileUrl: string, message: string): Promise<SDRResult<void>> {
-    await this.linkedin.draftMessage(profileUrl, message)
-    return {
-      text: `Opened draft message to ${profileUrl}: "${message}"`,
-      data: undefined,
+    const success = await this.linkedin.draftMessage(profileUrl, message)
+    if (success) {
+      return {
+        text: `Opened draft message to ${profileUrl}: "${message}"`,
+        data: undefined,
+      }
+    } else {
+      return {
+        text: `Failed to open draft message to ${profileUrl}: "${message}"`,
+        data: undefined,
+      }
     }
   }
 

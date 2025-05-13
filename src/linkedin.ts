@@ -153,32 +153,40 @@ export class LinkedIn {
    * @param profileUrl LinkedIn profile URL
    * @param message Message to draft
    */
-  async draftMessage(profileUrl: string, message: string): Promise<void> {
-    await this.withLinkedin(
-      profileUrl,
-      async (page) => {
-        // Wait for the message button and click it
-        // Try multiple selector strategies to find the message button
-        await page.waitForSelector(`button[aria-label*="Message"]`, {
-          timeout: 5000,
-        })
+  async draftMessage(profileUrl: string, message: string): Promise<boolean> {
+    return (
+      (await this.withLinkedin(
+        profileUrl,
+        async (page) => {
+          // Wait for the message button and click it
+          // Try multiple selector strategies to find the message button
+          try {
+            await page.waitForSelector(`button[aria-label*="Message"]`, {
+              timeout: 5000,
+            })
+          } catch (error) {
+            console.error('No message button found on ' + profileUrl)
+            return false
+          }
 
-        const messageButtons = await page.$$(`button[aria-label*="Message"]`)
+          const messageButtons = await page.$$(`button[aria-label*="Message"]`)
 
-        // Click the second button if it exists, otherwise click the first one
-        if (messageButtons.length >= 2) {
-          await messageButtons[1].click()
-        } else if (messageButtons.length === 1) {
-          await messageButtons[0].click()
-        } else {
-          throw new Error(`No message button found`)
-        }
+          // Click the second button if it exists, otherwise click the first one
+          if (messageButtons.length >= 2) {
+            await messageButtons[1].click()
+          } else if (messageButtons.length === 1) {
+            await messageButtons[0].click()
+          } else {
+            throw new Error(`No message button found`)
+          }
 
-        await new Promise((resolve) => setTimeout(resolve, 2000))
+          await new Promise((resolve) => setTimeout(resolve, 2000))
 
-        await page.keyboard.type(message)
-      },
-      { headless: false, useExistingBrowser: true },
+          await page.keyboard.type(message)
+          return true
+        },
+        { headless: false, useExistingBrowser: true },
+      )) || false
     )
   }
 
@@ -194,25 +202,22 @@ export class LinkedIn {
     const person = await this.findProfile(personName, companyName)
     const profileUrl = person.profileUrl
 
-    const mutualConnectionsUrl = await this.withLinkedin<string | null>(
-      profileUrl,
-      async (page) => {
-        return await page.evaluate(() => {
-          const links = Array.from(document.querySelectorAll('a[href*="facetNetwork"]'))
-          for (const link of links) {
-            const href = link.getAttribute('href')
-            if (
-              href &&
-              href.includes('facetNetwork=%22F%22') &&
-              href.includes('facetConnectionOf=')
-            ) {
-              return href
-            }
+    const mutualConnectionsUrl = await this.withLinkedin(profileUrl, async (page) => {
+      return await page.evaluate(() => {
+        const links = Array.from(document.querySelectorAll('a[href*="facetNetwork"]'))
+        for (const link of links) {
+          const href = link.getAttribute('href')
+          if (
+            href &&
+            href.includes('facetNetwork=%22F%22') &&
+            href.includes('facetConnectionOf=')
+          ) {
+            return href
           }
-          return null
-        })
-      },
-    )
+        }
+        return null
+      })
+    })
 
     if (mutualConnectionsUrl && typeof mutualConnectionsUrl === 'string') {
       const mutuals = await this.extractProfilesFromLinkedin(
@@ -230,66 +235,70 @@ export class LinkedIn {
     name: string,
     additionalInstructions: string = '',
   ): Promise<Profile[]> {
-    return await this.withLinkedin(url, async (page) => {
-      const screenshotPath = path.join(process.cwd(), 'search_screenshots', `${name}.png`)
+    return (
+      (await this.withLinkedin(url, async (page) => {
+        const screenshotPath = path.join(process.cwd(), 'search_screenshots', `${name}.png`)
 
-      // Remove summary elements that include a bunch of random text that can confuse the LLM
-      await page.evaluate(() => {
-        const summaryElements = document.querySelectorAll(
-          'p[class*="entity-result__summary--2-lines"]',
-        )
-        summaryElements.forEach((el) => el.remove())
-      })
-
-      await page.screenshot({
-        path: screenshotPath,
-        fullPage: true,
-      })
-      // console.log(`Search results screenshot saved to ${screenshotPath}`)
-
-      const profileUrls: string[] = (
+        // Remove summary elements that include a bunch of random text that can confuse the LLM
         await page.evaluate(() => {
-          const results: string[] = []
-          const profileLinks = Array.from(document.querySelectorAll('a[href*="linkedin.com/in/"]'))
-            .map((link) => link.getAttribute('href'))
-            .filter((href) => href && href.match(/https:\/\/www\.linkedin\.com\/in\/[\w-]+/))
-            .filter((href, index, self) => self.indexOf(href) === index) as string[]
-          profileLinks.forEach((profileUrl) => {
-            results.push(profileUrl)
+          const summaryElements = document.querySelectorAll(
+            'p[class*="entity-result__summary--2-lines"]',
+          )
+          summaryElements.forEach((el) => el.remove())
+        })
+
+        await page.screenshot({
+          path: screenshotPath,
+          fullPage: true,
+        })
+        // console.log(`Search results screenshot saved to ${screenshotPath}`)
+
+        const profileUrls: string[] = (
+          await page.evaluate(() => {
+            const results: string[] = []
+            const profileLinks = Array.from(
+              document.querySelectorAll('a[href*="linkedin.com/in/"]'),
+            )
+              .map((link) => link.getAttribute('href'))
+              .filter((href) => href && href.match(/https:\/\/www\.linkedin\.com\/in\/[\w-]+/))
+              .filter((href, index, self) => self.indexOf(href) === index) as string[]
+            profileLinks.forEach((profileUrl) => {
+              results.push(profileUrl)
+            })
+            return results
           })
-          return results
-        })
-      )
-        .map(cleanUrlQueryParams)
-        .filter((url) => {
-          // Filter out URLs with final slug >38 characters and containing numbers
-          // Extract the slug (the part after /in/)
-          const match = url.match(/linkedin\.com\/in\/([\w-]+)/)
-          if (!match) return false
+        )
+          .map(cleanUrlQueryParams)
+          .filter((url) => {
+            // Filter out URLs with final slug >38 characters and containing numbers
+            // Extract the slug (the part after /in/)
+            const match = url.match(/linkedin\.com\/in\/([\w-]+)/)
+            if (!match) return false
 
-          const slug = match[1]
+            const slug = match[1]
 
-          // Check if slug is >38 characters and contains numbers
-          if (slug.length > 38 && /\d/.test(slug)) {
-            return false
-          }
+            // Check if slug is >38 characters and contains numbers
+            if (slug.length > 38 && /\d/.test(slug)) {
+              return false
+            }
 
-          return true
-        })
+            return true
+          })
 
-      // const google = new GoogleAI('gemini-2.5-pro-preview-05-06')
-      const google = new GoogleAI('gemini-2.0-flash')
-      const profiles = await google.generateStructuredData(
-        `Here is a screenshot of a LinkedIn search results page and some urls that appear on that page. Match the urls to the profiles in the screenshot. Return a list of profiles with the following fields: name, role, company, profileUrl. If no profiles are found, return an empty list.` +
-          additionalInstructions +
-          '\n\n' +
-          profileUrls.join('\n'),
-        z.array(ProfileSchema),
-        screenshotPath,
-      )
+        // const google = new GoogleAI('gemini-2.5-pro-preview-05-06')
+        const google = new GoogleAI('gemini-2.0-flash')
+        const profiles = await google.generateStructuredData(
+          `Here is a screenshot of a LinkedIn search results page and some urls that appear on that page. Match the urls to the profiles in the screenshot. Return a list of profiles with the following fields: name, role, company, profileUrl. If no profiles are found, return an empty list.` +
+            additionalInstructions +
+            '\n\n' +
+            profileUrls.join('\n'),
+          z.array(ProfileSchema),
+          screenshotPath,
+        )
 
-      return profiles
-    })
+        return profiles
+      })) || []
+    )
   }
 
   private async withLinkedin<T>(
@@ -327,7 +336,7 @@ export class LinkedIn {
       } else {
         console.error('No cookies found. Please run the login method first.')
         await browser.close()
-        return []
+        return undefined
       }
 
       await page.goto(url, { waitUntil: 'load' })
