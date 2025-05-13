@@ -76,7 +76,7 @@ export async function startClientAndGetTools(
     )
     Object.assign(allTools, prefixedClientTools)
 
-    console.log(`Added tools from ${name}: ${Object.keys(prefixedClientTools).join(', ')}`)
+    console.log(`Added tools from ${name}: ${Object.keys(prefixedClientTools).join(', ')}\n`)
   }
 
   return { tools: allTools }
