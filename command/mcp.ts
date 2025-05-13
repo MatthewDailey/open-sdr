@@ -3,11 +3,9 @@
  */
 
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
-import { experimental_createMCPClient } from 'ai'
-import { type Tool } from 'ai'
-import { SDR } from './sdr'
+import { experimental_createMCPClient, type Tool } from 'ai'
 
-const mcpCommands = [
+const mcpCommands: { name: string; command: string[]; env?: Record<string, string> }[] = [
   ////////////////////////////////
   // Used for the hackathon.
   // {
@@ -35,11 +33,11 @@ const mcpCommands = [
     name: 'open-sdr',
     command: ['npx', '-y', 'mcp-remote@0.1.0-0', 'http://localhost:3000/mcp'],
   },
-  {
-    name: 'ref-tools',
-    command: ['npx', '-y', 'ref-tools-mcp'],
-    env: { REF_ALPHA: 'open-sdr-ref' },
-  },
+  // {
+  //   name: 'ref-tools',
+  //   command: ['npx', '-y', 'ref-tools-mcp'],
+  //   env: { REF_ALPHA: 'open-sdr-ref-matt' },
+  // },
 ]
 
 export enum OpenSdrMode {
