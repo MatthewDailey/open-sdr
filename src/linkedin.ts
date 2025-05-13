@@ -153,20 +153,17 @@ export class LinkedIn {
    * @param profileUrl LinkedIn profile URL
    * @param message Message to draft
    */
-  async draftMessage(name: string, profileUrl: string, message: string): Promise<void> {
+  async draftMessage(profileUrl: string, message: string): Promise<void> {
     await this.withLinkedin(
       profileUrl,
       async (page) => {
-        // Extract first name from the full name
-        const firstName = name.split(' ')[0]
-
         // Wait for the message button and click it
         // Try multiple selector strategies to find the message button
-        await page.waitForSelector(`button[aria-label*="Message ${firstName}"]`, {
+        await page.waitForSelector(`button[aria-label*="Message"]`, {
           timeout: 5000,
         })
 
-        const messageButtons = await page.$$(`button[aria-label*="Message ${firstName}"]`)
+        const messageButtons = await page.$$(`button[aria-label*="Message"]`)
 
         // Click the second button if it exists, otherwise click the first one
         if (messageButtons.length >= 2) {
@@ -174,7 +171,7 @@ export class LinkedIn {
         } else if (messageButtons.length === 1) {
           await messageButtons[0].click()
         } else {
-          throw new Error(`No message button found for ${firstName}`)
+          throw new Error(`No message button found`)
         }
 
         await new Promise((resolve) => setTimeout(resolve, 2000))

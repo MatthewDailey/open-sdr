@@ -79,13 +79,12 @@ export class SDR {
       name: 'draftMessage',
       description: 'Draft a message to a LinkedIn connection',
       parameters: {
-        name: z.string().describe('Name of the person to message'),
         profileUrl: z.string().describe("URL of the person's LinkedIn profile"),
         message: z.string().describe('Message text to draft'),
       },
-      execute: async function (this: SDR, { name, profileUrl, message }) {
-        this.draftMessage(name, profileUrl, message)
-        return 'Opening draft message to ' + name + ' with message: ' + message
+      execute: async function (this: SDR, { profileUrl, message }) {
+        await this.draftMessage(profileUrl, message)
+        return 'Opening draft message to ' + profileUrl + ' with message: ' + message
       },
     },
     {
@@ -240,14 +239,13 @@ export class SDR {
 
   /**
    * Draft a message to a LinkedIn connection
-   * @param name Name of the person to message
    * @param profileUrl URL of the person's LinkedIn profile
    * @param message Message to draft
    */
-  async draftMessage(name: string, profileUrl: string, message: string): Promise<SDRResult<void>> {
-    await this.linkedin.draftMessage(name, profileUrl, message)
+  async draftMessage(profileUrl: string, message: string): Promise<SDRResult<void>> {
+    await this.linkedin.draftMessage(profileUrl, message)
     return {
-      text: `Opened draft message to ${name}: "${message}"`,
+      text: `Opened draft message to ${profileUrl}: "${message}"`,
       data: undefined,
     }
   }

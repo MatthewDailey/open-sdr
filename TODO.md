@@ -64,14 +64,13 @@ company_background(company or tool name) -> deep research + structured extract
   -> undo, seems bad
 [x] make sure all workflow steps are passed through verbatim to the inner agent
 [x] write file tool to save results (eg as csv)
-
-[] try "find a list of ai coding tool"
-[] try running it on a larger suite
+[x] try "find a list of ai coding tool"
+[x] try running it on a larger suite
 [x] messaging workflow - given a profile, open message link to person? (have puppeteer open a dom node including background on this person)
   - aria-label message
-[] search often finds people that do not work at the company 
+[x] search often finds people that do not work at the company 
   - add a verify step for each person? or use the screenshot?
-[] make message more stable than using name
+[] make message more stable than using name (ex jay)
 [] make message not die if no message
 
 [] publishing
