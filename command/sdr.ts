@@ -8,6 +8,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { z } from 'zod'
 import { gatherCompanyBackground, type CompanyBackground } from './background.js'
 import { createFirecrawlClient, type Activity, type DeepResearchData } from './firecrawl.js'
+import { runSdrAgentOnEachCompany, type SDRAgentResult } from './sdr_agent'
 
 export type SDRResult<T> = {
   text: string
@@ -180,6 +181,23 @@ export class SDR {
   }
 
   /**
+   * Run the SDR agent for each company mentioned in the prompt
+   * @param prompt The prompt containing companies and task information
+   */
+  async runAgentOnEachCompany(prompt: string): Promise<SDRResult<SDRAgentResult[]>> {
+    const results = await runSdrAgentOnEachCompany(prompt)
+    const text = results
+      .map((result) => {
+        return `===== RESULTS FOR AGENT RUNNING ON ${result.company} ======\n${result.synthesis}\n============================`
+      })
+      .join('\n\n\n')
+    return {
+      text,
+      data: results,
+    }
+  }
+
+  /**
    * Starts an MCP server as a background process using StreamableHTTPServerTransport
    * @returns URL of the MCP server
    */
@@ -308,6 +326,25 @@ export class SDR {
               {
                 type: 'text',
                 text: researchData.text,
+              },
+            ],
+          }
+        },
+      )
+
+      server.tool(
+        'runAgentOnEachCompany',
+        'Run the SDR agent for each company mentioned in the prompt. This should be used when the user wants something done for multiple companies to make sure each is handled completely.',
+        {
+          prompt: z.string().describe('The prompt containing companies and task information'),
+        },
+        async ({ prompt }) => {
+          const result = await this.runAgentOnEachCompany(prompt)
+          return {
+            content: [
+              {
+                type: 'text',
+                text: result.text,
               },
             ],
           }
