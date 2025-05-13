@@ -8,10 +8,9 @@ import dotenv from 'dotenv'
 import fs from 'fs'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
-import { doAgentLoop } from './agent'
-import { startClientAndGetTools } from './mcp'
-import { SDR } from './sdr'
 import { startMcpServer } from '../server/mcp'
+import { SDR } from './sdr'
+import { runSdrAgent } from './sdr_agent.js'
 
 dotenv.config()
 yargs(hideBin(process.argv))
@@ -20,48 +19,19 @@ yargs(hideBin(process.argv))
     await sdr.login()
   })
   .command(
-    'sdr <prompt>',
-    'Run the AI agent with the given prompt',
+    'agent <promptFilePath>',
+    'Run the AI agent with a prompt from the specified file',
     (yargs) => {
-      return yargs.positional('prompt', {
-        describe: 'The prompt to send to the AI agent',
+      return yargs.positional('promptFilePath', {
+        describe: 'Path to the file containing the prompt for the AI agent',
         type: 'string',
         demandOption: true,
       })
     },
     async (argv) => {
-      const prompt = argv.prompt as string
-
-      // Load MCP tools before starting the agent loop
-      console.log('Loading MCP tools...')
-      const { tools } = await startClientAndGetTools()
-      console.log('MCP tools loaded successfully.')
-
-      await doAgentLoop(
-        prompt,
-        (step) => {
-          // Handle tool calls with a nice representation
-          if (step.toolCalls.length > 0) {
-            for (let i = 0; i < step.toolCalls.length; i++) {
-              const toolCall = step.toolCalls[i]
-              const toolResult = step.toolResults[i]
-              console.log(chalk.yellow('\n====== ' + toolCall.toolName + ' ======'))
-              for (const [key, value] of Object.entries(toolCall.args)) {
-                console.log(chalk.yellow(`${key}: ${value}`))
-              }
-              console.log(chalk.yellow('\n======  Result  ======'))
-              console.log(chalk.yellow(JSON.stringify(toolResult, null, 2)))
-              console.log(chalk.yellow('=======================\n'))
-            }
-          }
-        },
-        (chunk) => {
-          // Stream text to console in green
-          process.stdout.write(chalk.green(chunk))
-        },
-        tools, // Pass the MCP tools to the agent loop
-      )
-      console.log('\n') // Add a newline after completion
+      const promptFilePath = argv.promptFilePath as string
+      const prompt = fs.readFileSync(promptFilePath, 'utf8')
+      await runSdrAgent(prompt)
     },
   )
   .command('server', 'Start the MCP server', {}, async () => {
