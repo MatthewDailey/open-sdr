@@ -4,17 +4,13 @@
  */
 
 import chalk from 'chalk'
+import dotenv from 'dotenv'
 import fs from 'fs'
-import yaml from 'js-yaml'
-import path from 'path'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import { doAgentLoop } from './agent'
-import type { Activity } from './firecrawl'
-import { createFirecrawlClient } from './firecrawl'
 import { startClientAndGetTools } from './mcp'
 import { SDR } from './sdr'
-import dotenv from 'dotenv'
 
 dotenv.config()
 yargs(hideBin(process.argv))
@@ -186,33 +182,14 @@ yargs(hideBin(process.argv))
     },
   )
   .command(
-    'research [query]',
-    'Perform deep research on a topic using Firecrawl',
+    'research <query>',
+    'Perform deep research on a topic using the SDR class',
     (yargs) => {
-      // Get API key from environment variable if available
-      const envApiKey = process.env.FIRECRAWL_API_KEY || ''
-
       return yargs
         .positional('query', {
-          describe: 'The research query or topic to investigate (or omit if using --file)',
+          describe: 'The research query or topic to investigate',
           type: 'string',
-        })
-        .option('file', {
-          describe: 'Path to a file containing the query text',
-          type: 'string',
-        })
-        .check((argv) => {
-          // Ensure either query or file is provided
-          if (!argv.query && !argv.file) {
-            throw new Error('Either a query argument or --file option must be provided')
-          }
-          return true
-        })
-        .option('api-key', {
-          describe: 'Firecrawl API key (defaults to FIRECRAWL_API_KEY env variable)',
-          type: 'string',
-          default: envApiKey,
-          demandOption: !envApiKey, // Only required if not in environment
+          demandOption: true,
         })
         .option('depth', {
           describe: 'Maximum research depth (1-10)',
@@ -236,130 +213,33 @@ yargs(hideBin(process.argv))
         })
     },
     async (argv) => {
-      let query: string
-      let inputFilePath: string | undefined
-
-      // Determine query source - either from command line or from file
-      if (argv.file) {
-        try {
-          inputFilePath = path.resolve(argv.file as string)
-          console.log(chalk.blue(`Loading query from file: ${inputFilePath}`))
-          query = fs.readFileSync(inputFilePath, 'utf8').trim()
-
-          // If file content is too short, warn the user
-          if (query.length < 5) {
-            console.warn(chalk.yellow('Warning: Query file content is very short'))
-          }
-        } catch (error: any) {
-          console.error(chalk.red(`Error reading query file: ${error.message}`))
-          process.exit(1)
-        }
-      } else {
-        query = argv.query as string
-      }
-
-      const apiKey = argv['api-key'] as string
-      if (!apiKey) {
-        console.error(
-          chalk.red(
-            'Error: Firecrawl API key is required. Set it using --api-key or the FIRECRAWL_API_KEY environment variable.',
-          ),
-        )
-        process.exit(1)
-      }
-
+      const query = argv.query as string
       const maxDepth = argv.depth as number
       const timeLimit = argv['time-limit'] as number
       const maxUrls = argv['max-urls'] as number
-      let outputPath = argv.output as string | undefined
+      const outputPath = argv.output as string | undefined
 
-      // If input file was used but no output specified, create default output path
-      if (inputFilePath && !outputPath) {
-        const inputDir = path.dirname(inputFilePath)
-        const inputBasename = path.basename(inputFilePath, path.extname(inputFilePath))
-        outputPath = path.join(inputDir, `${inputBasename}.results.yaml`)
-      }
+      console.log(`Performing deep research on: "${query}"`)
+      console.log(`Settings: Depth=${maxDepth}, Time Limit=${timeLimit}s, Max URLs=${maxUrls}`)
 
-      console.log(chalk.blue(`Starting deep research: "${query}"`))
-      console.log(
-        chalk.blue(`Settings: Depth=${maxDepth}, Time Limit=${timeLimit}s, Max URLs=${maxUrls}`),
-      )
-
-      const firecrawl = createFirecrawlClient(apiKey)
-
-      try {
-        // Define activity callback to show progress
-        const onActivity = (activity: Activity) => {
+      const sdr = new SDR()
+      const researchData = await sdr.performResearch(query, {
+        maxDepth,
+        timeLimit,
+        maxUrls,
+        onActivity: (activity) => {
           const depthPrefix = `[Depth ${activity.depth}]`
           const typePrefix = `[${activity.type.charAt(0).toUpperCase() + activity.type.slice(1)}]`
           console.log(chalk.yellow(`${depthPrefix} ${typePrefix} ${activity.message}`))
-        }
+        },
+      })
 
-        // Start research
-        const result = await firecrawl.deepResearch(
-          {
-            query,
-            maxDepth,
-            timeLimit,
-            maxUrls,
-          },
-          5000, // Poll every 5 seconds
-          onActivity,
-        )
+      console.log(chalk.green('\n==== RESEARCH COMPLETE ====\n'))
+      console.log(researchData.text)
 
-        // Display research results
-        console.log(chalk.green('\n==== RESEARCH COMPLETE ====\n'))
-
-        // Display final analysis
-        if (result.finalAnalysis) {
-          console.log(chalk.green('FINAL ANALYSIS:'))
-          console.log(result.finalAnalysis)
-          console.log('')
-        }
-
-        // Display sources
-        console.log(chalk.green(`SOURCES (${result.sources.length}):`))
-        result.sources.forEach((source, index) => {
-          console.log(chalk.cyan(`[${index + 1}] ${source.title}`))
-          console.log(`    ${source.url}`)
-          if (source.description) console.log(`    ${source.description}`)
-          console.log('')
-        })
-
-        // Save results to file if requested
-        if (outputPath) {
-          try {
-            const outputContent = {
-              query,
-              finalAnalysis: result.finalAnalysis,
-              sources: result.sources,
-              activities: result.activities,
-              metadata: {
-                timestamp: new Date().toISOString(),
-                depth: result.currentDepth,
-                maxDepth: result.maxDepth,
-                timeLimit,
-                maxUrls,
-                totalUrls: result.totalUrls,
-              },
-            }
-
-            // Convert to YAML and save
-            const yamlContent = yaml.dump(outputContent, {
-              indent: 2,
-              lineWidth: 120,
-              noRefs: true,
-            })
-            fs.writeFileSync(outputPath, yamlContent, 'utf8')
-
-            console.log(chalk.green(`\nResults saved to: ${outputPath}`))
-          } catch (error: any) {
-            console.error(chalk.red(`Error saving results: ${error.message}`))
-          }
-        }
-      } catch (error: any) {
-        console.error(chalk.red('Error performing research:'), error.message)
-        process.exit(1)
+      if (outputPath) {
+        fs.writeFileSync(outputPath, researchData.text, 'utf8')
+        console.log(`\nResults saved to: ${outputPath}`)
       }
     },
   )

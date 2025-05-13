@@ -7,6 +7,7 @@ import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { z } from 'zod'
 import { gatherCompanyBackground, type CompanyBackground } from './background.js'
+import { createFirecrawlClient, type Activity, type DeepResearchData } from './firecrawl.js'
 
 export type SDRResult<T> = {
   text: string
@@ -127,6 +128,58 @@ export class SDR {
   }
 
   /**
+   * Perform deep research on a topic using Firecrawl
+   * @param query The research query or topic to investigate
+   * @param options Additional options for research
+   * @returns Promise with research results
+   */
+  async performResearch(
+    query: string,
+    options: {
+      maxDepth?: number
+      timeLimit?: number
+      maxUrls?: number
+      onActivity?: (activity: Activity) => void
+    } = {},
+  ): Promise<SDRResult<DeepResearchData>> {
+    const { maxDepth = 5, timeLimit = 180, maxUrls = 15, onActivity } = options
+
+    const apiKey = process.env.FIRECRAWL_API_KEY
+    if (!apiKey) throw new Error('Firecrawl API key is required')
+    if (!query) throw new Error('Query is required')
+
+    const fc = createFirecrawlClient(apiKey)
+
+    const data = await fc.deepResearch(
+      {
+        query,
+        maxDepth,
+        timeLimit,
+        maxUrls,
+      },
+      5000,
+      onActivity,
+    )
+
+    let text = `==== RESEARCH RESULTS ====\n\n`
+    text += `# Query: ${query}\n\n`
+    if (data.finalAnalysis) {
+      text += `# Final Analysis:\n${data.finalAnalysis}\n\n`
+    }
+    text += `# Sources (${data.sources.length}):\n`
+    data.sources.forEach((source, index) => {
+      text += `[${index + 1}] ${source.title || 'Untitled'}\n`
+      text += `    ${source.url}\n`
+      if (source.description) text += `    ${source.description}\n`
+    })
+
+    return {
+      text,
+      data,
+    }
+  }
+
+  /**
    * Starts an MCP server as a background process using StreamableHTTPServerTransport
    * @returns URL of the MCP server
    */
@@ -229,6 +282,32 @@ export class SDR {
               {
                 type: 'text',
                 text: companyData.text,
+              },
+            ],
+          }
+        },
+      )
+
+      server.tool(
+        'deepResearch',
+        'Perform deep research on a topic',
+        {
+          query: z.string().describe('The research query or topic to investigate'),
+          maxDepth: z.number().optional().describe('Maximum research depth (1-10)'),
+          timeLimit: z.number().optional().describe('Time limit in seconds (30-300)'),
+          maxUrls: z.number().optional().describe('Maximum URLs to analyze'),
+        },
+        async ({ query, maxDepth, timeLimit, maxUrls }) => {
+          const researchData = await this.performResearch(query, {
+            maxDepth,
+            timeLimit,
+            maxUrls,
+          })
+          return {
+            content: [
+              {
+                type: 'text',
+                text: researchData.text,
               },
             ],
           }
