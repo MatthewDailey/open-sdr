@@ -30,7 +30,7 @@ export async function doAgentLoop(
 
   // console.log('Tools:', tools)
   const { textStream, fullStream } = streamText({
-    model: anthropic('claude-3-5-sonnet-latest'),
+    model: anthropic('claude-3-7-sonnet-latest'),
     system: prompt.system,
     prompt: prompt.user,
     tools,
