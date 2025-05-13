@@ -49,7 +49,7 @@ company_background(company or tool name) -> deep research + structured extract
 [x] have research tools in SDR class and add to MCP
 [x] add all MCP tools
 [x] have all SDR functions return objects and markdown answer
-[] extract research tool
+[x] extract research tool
 [] organize commands
   - `sdr login`
   - `sdr tools <command>` 
@@ -74,6 +74,6 @@ company_background(company or tool name) -> deep research + structured extract
   [] read env from .env (implemented, validate this)
   [] clean up logs
   [] generate landing page (simpleanalytics) and figma sites!
-  [] update commands to `sdr` and `server`
+  [] add binary for global install
   [] delete the hackathon web app
   [] setup steps: firecrawl, gemini, anthropic

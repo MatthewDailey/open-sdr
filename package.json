@@ -6,7 +6,6 @@
     "start": "NODE_ENV=production tsx server/index.ts",
     "dev": "concurrently \"vite\" \"tsx watch server/index.ts\"",
     "cli": "tsx command/command.ts",
-    "deploy": "railway up",
     "test": "vitest",
     "format": "prettier --write .",
     "check": "tsc --noEmit",
