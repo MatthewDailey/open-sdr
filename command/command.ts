@@ -12,7 +12,13 @@ import { startMcpServer } from '../server/mcp'
 import { SDR } from './sdr'
 import { runSdrAgent } from './sdr_agent.js'
 
-dotenv.config()
+if (fs.existsSync('.env')) {
+  console.log('Loading environment variables from .env file')
+  dotenv.config({ override: true })
+} else {
+  console.log('No .env file found')
+}
+
 yargs(hideBin(process.argv))
   .command('login', 'Login to LinkedIn and save cookies', {}, async (argv) => {
     const sdr = new SDR()
