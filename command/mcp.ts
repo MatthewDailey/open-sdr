@@ -52,13 +52,13 @@ export async function startClientAndGetTools(
 ): Promise<{
   tools: Record<string, Tool>
 }> {
-  console.log('Starting MCP clients...')
-
   const allTools: Record<string, Tool> = {}
 
   // Create a client for each MCP command
   for (const { name, command } of mcpCommands) {
-    console.log(`-> ${name}`)
+    if (name === 'open-sdr' && openSdrMode !== OpenSdrMode.REMOTE) {
+      continue
+    }
 
     // Create a client with the appropriate transport
     const client = await experimental_createMCPClient({
@@ -78,29 +78,6 @@ export async function startClientAndGetTools(
 
     console.log(`Added tools from ${name}: ${Object.keys(prefixedClientTools).join(', ')}`)
   }
-
-  if (openSdrMode === OpenSdrMode.LOCAL) {
-    // TODO: Implement local open-sdr server
-    // console.log('Starting local open-sdr server...')
-    // const sdr = new SDR()
-    // const mcpServer = await sdr.startMcpServer()
-    // // Create a transport for the MCP server
-    // const transport = new StdioClientTransport()
-    // // Connect the transport to the MCP server
-    // await mcpServer.connect(transport)
-    // const openSdrClient = await experimental_createMCPClient({
-    //   transport,
-    // })
-    // const openSdrTools = await openSdrClient.tools()
-    // const prefixedClientTools = Object.fromEntries(
-    //   Object.entries(openSdrTools).map(([key, tool]) => ['open-sdr_' + key, tool]),
-    // )
-    // Object.assign(allTools, prefixedClientTools)
-    // console.log(`Added tools from open-sdr: ${Object.keys(prefixedClientTools).join(', ')}`)
-  }
-
-  console.log('All MCP clients ready.')
-  console.log('Available MCP tools:', Object.keys(allTools).join(', '))
 
   return { tools: allTools }
 }

@@ -9,6 +9,7 @@ import { gatherCompanyBackground, type CompanyBackground } from './background.js
 import { createFirecrawlClient, type Activity, type DeepResearchData } from './firecrawl.js'
 import { LinkedIn, type Profile } from './linkedin.js'
 import { runSdrAgentOnEachCompany, type SDRAgentResult } from './sdr_agent'
+import { tool } from 'ai'
 
 export type SDRResult<T> = {
   text: string
@@ -378,5 +379,129 @@ export class SDR {
     )
 
     return server
+  }
+
+  /**
+   * Returns Vercel AI SDK tools that match the tools in the MCP server
+   * @returns Object containing Vercel AI SDK tools
+   */
+  async getTools() {
+    return {
+      findLinkedinConnectionsAt: tool({
+        description:
+          'Find connections at a specific company with specified connection degree with LinkedIn',
+        parameters: z.object({
+          companyName: z.string().describe('The company name to search for'),
+          degree: z.enum(['first', 'second']).describe('Connection degree (first or second)'),
+        }),
+        execute: async ({ companyName, degree }) => {
+          const profiles = await this.findConnectionsAtCompany(companyName, degree)
+          return profiles.data
+        },
+      }),
+
+      findProfile: tool({
+        description: 'Find a LinkedIn profile by name',
+        parameters: z.object({
+          personName: z.string().describe('The person name to search for'),
+          companyName: z.string().optional().describe('Optional company name to filter results'),
+        }),
+        execute: async ({ personName, companyName }) => {
+          const profile = await this.findProfile(personName, companyName)
+          return profile.data
+        },
+      }),
+
+      findMutualConnections: tool({
+        description: 'Find mutual connections with a person on LinkedIn',
+        parameters: z.object({
+          personName: z.string().describe('The person name to search for'),
+          companyName: z
+            .string()
+            .optional()
+            .describe('Optional (but very helpful!) company name to filter results'),
+        }),
+        execute: async ({ personName, companyName }) => {
+          const connections = await this.findMutualConnections(personName, companyName)
+          return connections.data
+        },
+      }),
+
+      researchCompany: tool({
+        description: 'Gather comprehensive background information about a company',
+        parameters: z.object({
+          companyName: z.string().describe('The company name to research'),
+          companyContext: z
+            .string()
+            .optional()
+            .describe(
+              'Additional context about the company to help with research (eg "they are a startup", "they are in AI")',
+            ),
+          peopleGuidance: z
+            .string()
+            .optional()
+            .describe(
+              'Specific focus for researching people at the company (eg "business founders", "software engineers"',
+            ),
+        }),
+        execute: async ({ companyName, companyContext, peopleGuidance }) => {
+          const companyData = await this.gatherCompanyBackground(companyName, {
+            companyContext,
+            peopleGuidance,
+          })
+          return companyData.data
+        },
+      }),
+
+      deepResearch: tool({
+        description: 'Perform deep research on a topic',
+        parameters: z.object({
+          query: z.string().describe('The research query or topic to investigate'),
+          maxDepth: z.number().optional().describe('Maximum research depth (1-10)'),
+          timeLimit: z.number().optional().describe('Time limit in seconds (30-300)'),
+          maxUrls: z.number().optional().describe('Maximum URLs to analyze'),
+        }),
+        execute: async ({ query, maxDepth, timeLimit, maxUrls }) => {
+          const researchData = await this.performResearch(query, {
+            maxDepth,
+            timeLimit,
+            maxUrls,
+          })
+          return researchData.data
+        },
+      }),
+
+      runAgentOnEachCompany: tool({
+        description:
+          'Run the SDR agent for each company mentioned in the prompt. This should be used when the user wants something done for multiple companies to make sure each is handled completely.',
+        parameters: z.object({
+          prompt: z.string().describe('The prompt containing companies and task information'),
+        }),
+        execute: async ({ prompt }) => {
+          const result = await this.runAgentOnEachCompany(prompt)
+          return result.data
+        },
+      }),
+
+      writeSdrNotes: tool({
+        description:
+          'Write markdown content to a file in the SDR notes directory. This should be used for the agent to output a summary of its work or when requested to save a file.',
+        parameters: z.object({
+          content: z.string().describe('The markdown content to write to the file'),
+          filename: z
+            .string()
+            .optional()
+            .describe('Optional filename (without extension) to use for the file'),
+          subdirectory: z
+            .string()
+            .optional()
+            .describe('Optional subdirectory within SDR notes to store the file'),
+        }),
+        execute: async ({ content, filename, subdirectory }) => {
+          const result = await writeMarkdown(content, { filename, subdirectory })
+          return { filePath: result.filePath }
+        },
+      }),
+    }
   }
 }

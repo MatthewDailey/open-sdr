@@ -9,6 +9,7 @@ import { z } from 'zod'
 import { doAgentLoop } from './agent'
 import { GoogleAI } from './google'
 import { OpenSdrMode, startClientAndGetTools } from './mcp'
+import { SDR } from './sdr'
 
 export type SDRAgentResult = {
   chatLog: string
@@ -29,6 +30,8 @@ export async function runSdrAgent(
   try {
     const { tools } = await startClientAndGetTools(OpenSdrMode.LOCAL)
 
+    const sdrTools = await new SDR().getTools()
+    Object.assign(tools, sdrTools)
     await doAgentLoop(
       {
         system: 'You are a helpful assistant that can use tools to help the user.',
@@ -42,25 +45,25 @@ export async function runSdrAgent(
             const toolResult = step.toolResults[i]
             const toolLogEntry = `\n====== ${toolCall.toolName} ======\n`
             chatLog += toolLogEntry
-            if (options.logToConsole) console.log(toolLogEntry)
+            if (options.logToConsole) console.log(toolLogEntry.trim())
 
             for (const [key, value] of Object.entries(toolCall.args)) {
               const argLogEntry = `${key}: ${value}\n`
               chatLog += argLogEntry
-              if (options.logToConsole) console.log(argLogEntry)
+              if (options.logToConsole) console.log(argLogEntry.trim())
             }
 
             const resultHeader = '\n======  Result  ======\n'
             chatLog += resultHeader
-            if (options.logToConsole) console.log(resultHeader)
+            if (options.logToConsole) console.log(resultHeader.trim())
 
             const resultJson = JSON.stringify(toolResult, null, 2) + '\n'
             chatLog += resultJson
-            if (options.logToConsole) console.log(resultJson)
+            if (options.logToConsole) console.log(resultJson.trim())
 
             const separator = '=======================\n\n'
             chatLog += separator
-            if (options.logToConsole) console.log(separator)
+            if (options.logToConsole) console.log(separator.trim())
           }
         }
       },
@@ -72,11 +75,10 @@ export async function runSdrAgent(
       tools, // Pass the MCP tools to the agent loop
     )
     chatLog += '\n' // Add a newline after completion
-    if (options.logToConsole) console.log('\n')
 
     const synthesis = await generateText({
       model: google('gemini-2.0-flash'),
-      prompt: `Synthesize the chat log into a concise summary.
+      prompt: `Synthesize the chat log into a concise summary. Make sure to include all details, especially links.
       Chat log: ${chatLog}`,
     })
 
