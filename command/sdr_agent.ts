@@ -3,13 +3,12 @@
  * with a prompt.
  */
 
-import chalk from 'chalk'
-import { doAgentLoop } from './agent'
-import { OpenSdrMode, startClientAndGetTools } from './mcp'
-import { GoogleAI } from './google'
-import { z } from 'zod'
-import { generateText } from 'ai'
 import { google } from '@ai-sdk/google'
+import { generateText } from 'ai'
+import { z } from 'zod'
+import { doAgentLoop } from './agent'
+import { GoogleAI } from './google'
+import { OpenSdrMode, startClientAndGetTools } from './mcp'
 
 export type SDRAgentResult = {
   chatLog: string
@@ -28,12 +27,7 @@ export async function runSdrAgent(
   let chatLog = ''
 
   try {
-    // Log to chatLog instead of console
-    chatLog += 'Loading MCP tools...\n'
-    if (options.logToConsole) console.log('Loading MCP tools...')
     const { tools } = await startClientAndGetTools(OpenSdrMode.LOCAL)
-    chatLog += 'MCP tools loaded successfully.\n'
-    if (options.logToConsole) console.log('MCP tools loaded successfully.')
 
     await doAgentLoop(
       {

@@ -123,7 +123,7 @@ export class SDR {
     })
 
     return {
-      text: `Company background for ${companyName}`,
+      text,
       data,
     }
   }
