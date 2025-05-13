@@ -62,25 +62,40 @@ company_background(company or tool name) -> deep research + structured extract
 [x] connect a golden path workflow
 [x] use gemini for agent loop to handle more tokens
   -> undo, seems bad
-[] make sure all workflow steps are passed through verbatim to the inner agent
-[] try running it on a larger suite
-[] try "find a list of ai coding tool"
+[x] make sure all workflow steps are passed through verbatim to the inner agent
+[x] write file tool to save results (eg as csv)
 
-[] niceties
-  [] open message link to person? (have puppeteer open a dom node including background on this person)
-  [] update mcp config to allow including only sepecific tools for other servers
-  [] login cli should have nicer messaging (eg you're now logged in)
-  [] chat UX for `sdr agent`
-[] MCP explorations
-  [x] write file tool to save results (eg as csv)
-  [] google sheets (company, person, warm intro)
-  [] try adding an email enrichment service
-  [] try adding store to notion (after allowing filter tools)
+[] try "find a list of ai coding tool"
+[] try running it on a larger suite
+[] messaging workflow - given a profile, open message link to person? (have puppeteer open a dom node including background on this person)
+  - aria-label message
+
 [] publishing
   [] read env from .env (implemented, validate this)
-  [] clean up logs
-  [] generate landing page (simpleanalytics) and figma sites! (link to ref at bottom)
   [] add binary for global install
   [] delete the hackathon web app
-  [] setup steps: firecrawl, gemini, anthropic
   [] move my prompts to sample prompt area
+  [] unify tool definitions (try result: string from MCP ones with claude)
+[] login cli should have nicer messaging (eg you're now logged in)
+  - hit enter to open linkedin in a browser to login, this is th browser that open-sdr will use. 
+  - when done, close the browser
+  - Done! you can run login again to open linkedin and verify open-sdr is logged in.
+  
+[] README with 
+[] generate landing page (simpleanalytics) and figma sites! (link to ref at bottom)
+content:
+[] description of SDRs job
+[] setup steps: firecrawl, gemini, anthropic api keys
+[] client demo video
+[] MCP ideas (mark untest)
+  - rime voice to announce (tested)
+  - google sheets (company, person, warm intro) -> test via claude integration
+  - try adding an email enrichment service -> apollo
+  - try adding store to notion (after allowing filter tools)
+  - slack to share briefings
+[] server demo video
+[] list of tools provided (visual between these?)
+[] landing page og: tags that work
+
+stretch
+[] chat UX for `sdr agent`

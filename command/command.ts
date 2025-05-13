@@ -120,6 +120,37 @@ yargs(hideBin(process.argv))
         },
       )
       .command(
+        'message <name> <profileUrl> <messageText>',
+        'Draft a message to a LinkedIn connection',
+        (yargs) => {
+          return yargs
+            .positional('name', {
+              describe: 'The person name to search for',
+              type: 'string',
+              demandOption: true,
+            })
+            .positional('profileUrl', {
+              describe: 'The person name to search for',
+              type: 'string',
+              demandOption: true,
+            })
+            .positional('messageText', {
+              describe: 'The message text to draft',
+              type: 'string',
+              demandOption: true,
+            })
+        },
+        async (argv) => {
+          const name = argv.name as string
+          const profileUrl = argv.profileUrl as string
+          const messageText = argv.messageText as string
+
+          const sdr = new SDR()
+          const result = await sdr.draftMessage(name, profileUrl, messageText)
+          console.log(result.text)
+        },
+      )
+      .command(
         'background <company>',
         'Gather comprehensive background information about a company',
         (yargs) => {

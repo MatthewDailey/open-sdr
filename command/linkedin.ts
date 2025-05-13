@@ -142,6 +142,43 @@ export class LinkedIn {
   }
 
   /**
+   * Open a browser to a LinkedIn profile with the message draft open and filled in.
+   * @param profileUrl LinkedIn profile URL
+   * @param message Message to draft
+   */
+  async draftMessage(name: string, profileUrl: string, message: string): Promise<void> {
+    await this.withLinkedin(
+      profileUrl,
+      async (page) => {
+        // Extract first name from the full name
+        const firstName = name.split(' ')[0]
+
+        // Wait for the message button and click it
+        // Try multiple selector strategies to find the message button
+        await page.waitForSelector(`button[aria-label*="Message ${firstName}"]`, {
+          timeout: 5000,
+        })
+
+        const messageButtons = await page.$$(`button[aria-label*="Message ${firstName}"]`)
+
+        // Click the second button if it exists, otherwise click the first one
+        if (messageButtons.length >= 2) {
+          await messageButtons[1].click()
+        } else if (messageButtons.length === 1) {
+          await messageButtons[0].click()
+        } else {
+          throw new Error(`No message button found for ${firstName}`)
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 2000))
+
+        await page.keyboard.type(message)
+      },
+      { headless: false },
+    )
+  }
+
+  /**
    * Find people I know that know a person
    * @param personName Name of the person to search for
    * @param companyName Company to search for
@@ -219,14 +256,19 @@ export class LinkedIn {
     })
   }
 
-  private async withLinkedin<T>(url: string, fn: (page: Page) => Promise<T>) {
+  private async withLinkedin<T>(
+    url: string,
+    fn: (page: Page) => Promise<T>,
+    options: { headless: boolean } = { headless: true },
+  ) {
     const browser = await puppeteer.launch({
-      headless: true,
-      defaultViewport: { width: 1280, height: 800 },
-      args: ['--window-size=1280,800'],
+      headless: options.headless,
+      defaultViewport: options.headless ? { width: 1280, height: 800 } : null,
+      args: options.headless ? ['--window-size=1280,800'] : [],
     })
 
-    const page = await browser.newPage()
+    const pages = await browser.pages()
+    const page = pages.length > 0 ? pages[0] : await browser.newPage()
 
     try {
       if (fs.existsSync(this.cookiesPath)) {
@@ -247,7 +289,13 @@ export class LinkedIn {
       await page.goto(url, { waitUntil: 'load' })
       await new Promise((resolve) => setTimeout(resolve, 5000))
 
-      return await fn(page)
+      const result = await fn(page)
+
+      if (!options.headless) {
+        await browser.waitForTarget((target) => target.opener() === null, { timeout: 0 })
+      }
+
+      return result
     } finally {
       await browser.close()
     }

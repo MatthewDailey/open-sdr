@@ -89,6 +89,21 @@ export class SDR {
       data,
     }
   }
+
+  /**
+   * Draft a message to a LinkedIn connection
+   * @param name Name of the person to message
+   * @param profileUrl URL of the person's LinkedIn profile
+   * @param message Message to draft
+   */
+  async draftMessage(name: string, profileUrl: string, message: string): Promise<SDRResult<void>> {
+    await this.linkedin.draftMessage(name, profileUrl, message)
+    return {
+      text: `Opened draft message to ${name}: "${message}"`,
+      data: undefined,
+    }
+  }
+
   /**
    * Gather comprehensive background information about a company
    * @param companyName Name of the company to research
@@ -278,6 +293,27 @@ export class SDR {
     )
 
     server.tool(
+      'draftMessage',
+      'Draft a message to a LinkedIn connection',
+      {
+        name: z.string().describe('Name of the person to message'),
+        profileUrl: z.string().describe("URL of the person's LinkedIn profile"),
+        message: z.string().describe('Message text to draft'),
+      },
+      async ({ name, profileUrl, message }) => {
+        const result = await this.draftMessage(name, profileUrl, message)
+        return {
+          content: [
+            {
+              type: 'text',
+              text: result.text,
+            },
+          ],
+        }
+      },
+    )
+
+    server.tool(
       'researchCompany',
       'Gather comprehensive background information about a company',
       {
@@ -439,6 +475,19 @@ export class SDR {
         execute: async ({ personName, companyName }) => {
           const connections = await this.findMutualConnections(personName, companyName)
           return connections.text
+        },
+      }),
+
+      draftMessage: tool({
+        description: 'Draft a message to a LinkedIn connection',
+        parameters: z.object({
+          name: z.string().describe('Name of the person to message'),
+          profileUrl: z.string().describe("URL of the person's LinkedIn profile"),
+          message: z.string().describe('Message text to draft'),
+        }),
+        execute: async ({ name, profileUrl, message }) => {
+          const result = await this.draftMessage(name, profileUrl, message)
+          return result.text
         },
       }),
 
