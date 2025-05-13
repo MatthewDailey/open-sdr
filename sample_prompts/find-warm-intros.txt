@@ -1,0 +1,33 @@
+I am building a tool that helps coding agents find and read documentation. I need your help finding leads to talk to at agent development companies. 
+
+Here is a list of things that are either a tool or a company:
+- Cursor
+- Windsurf
+- Zed
+
+Your task is to:
+1. Verify if this is a tool or a company. If it is a tool, find the company name. This is very important so we can find all the correct background and connections
+2. Gather background on the company.
+3. Find a good person to talk to about trying my tool (Ref). 
+
+Important notes:
+- When searching for linkedin links, ALWAYS use the actual company name you've found and not the product name.
+- The most important thing is to get the Linkedin profile URLs for the people to talk to and mutual connections if we are not directly connected.
+
+How to proceed:
+- Have a separate sub-agent look into each tool.
+- When a sub-agent finishes, have it speak just to say "finished looking into on <>". It should also write a SDR note about the company that includes linkedin urls.
+- When all sub-agents finish, write an overall summary report to "multi-query.md" with overall summary.
+
+What I want is a list like:
+<company1>:
+- <person to talk to> <linkedin url>
+  → <person who can give a warm intro> <url>
+  → <person who can give a warm intro> <url>
+  ..as many warm intros as we can find..
+- <person to talk to> <linkedin url>
+  → <person who can give a warm intro> <url>
+  ..
+..as many persons to talk to as we find..
+<company2>:
+...

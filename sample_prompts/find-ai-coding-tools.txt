@@ -1,0 +1,45 @@
+I am building a tool that helps coding agents find and read documentation. I need your help finding leads to talk to at agent development companies. 
+
+I need you to research and find a list of all the startups building AI coding tools. 
+
+Please do multiple rounds of research to find everything.
+
+Here is a list I already know, I need you to find even more like these.
+  All Hands 
+  Autify
+  Cognition - devin wiki feature could just have Ref installed, have user pick documentation they need
+  Cursor
+  Zed
+  Factory
+  Imbue
+  Lovable
+  bolt.new
+  v0
+  Magic
+  Poolside
+  qodo
+  tessl
+  replit
+  refact.ai
+  https://www.runwhen.com/
+  Tusk (resolveai)
+  fine.dev
+  Variant (maybe Toni knows)
+  ion design
+  Trae (hackathon people)
+  goose (hackathon people)
+  claude code devs
+  Factory
+  CODIRIS 
+  kodu.ai
+  void https://github.com/voideditor/void
+  RooCode 
+
+In your final output give me a list like:
+```
+<company> (<tool>) <company url>
+<company> (<tool>) <company url>
+...
+```
+
+Speak briefly outload to let me know you're down.

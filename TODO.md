@@ -67,7 +67,7 @@ company_background(company or tool name) -> deep research + structured extract
 
 [] try "find a list of ai coding tool"
 [] try running it on a larger suite
-[] messaging workflow - given a profile, open message link to person? (have puppeteer open a dom node including background on this person)
+[x] messaging workflow - given a profile, open message link to person? (have puppeteer open a dom node including background on this person)
   - aria-label message
 
 [] publishing
