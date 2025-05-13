@@ -83,3 +83,4 @@ company_background(company or tool name) -> deep research + structured extract
   [] add binary for global install
   [] delete the hackathon web app
   [] setup steps: firecrawl, gemini, anthropic
+  [] move my prompts to sample prompt area

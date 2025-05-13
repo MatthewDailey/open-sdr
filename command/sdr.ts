@@ -111,7 +111,8 @@ export class SDR {
     const data = await gatherCompanyBackground(companyName, options)
 
     let text = `==== COMPANY BACKGROUND ====\n`
-    text += `Name: ${data.name}\n`
+    text += `Company: ${data.companyName}\n`
+    text += `Product: ${data.productName}\n`
     text += `Website: ${data.homepageUrl}\n`
     text += `LinkedIn: ${data.linkedinUrl}\n\n`
     text += `Product/Service:\n${data.productDescription}\n\n`
@@ -212,7 +213,7 @@ export class SDR {
       'findLinkedinConnectionsAt',
       'Find connections at a specific company with specified connection degree with LinkedIn',
       {
-        companyName: z.string().describe('The company name to search for'),
+        companyName: z.string().describe('The company name to search for (not the product name)'),
         degree: z.enum(['first', 'second']).describe('Connection degree (first or second)'),
       },
       async ({ companyName, degree }) => {
@@ -233,7 +234,10 @@ export class SDR {
       'Find a LinkedIn profile by name',
       {
         personName: z.string().describe('The person name to search for'),
-        companyName: z.string().optional().describe('Optional company name to filter results'),
+        companyName: z
+          .string()
+          .optional()
+          .describe('Optional company name to filter results (not the product name)'),
       },
       async ({ personName, companyName }) => {
         const profiles = await this.findProfile(personName, companyName)
@@ -256,7 +260,9 @@ export class SDR {
         companyName: z
           .string()
           .optional()
-          .describe('Optional (but very helpful!) company name to filter results'),
+          .describe(
+            'Optional (but very helpful!) company name to filter results (not the product name)',
+          ),
       },
       async ({ personName, companyName }) => {
         const connections = await this.findMutualConnections(personName, companyName)
@@ -395,7 +401,7 @@ export class SDR {
         description:
           'Find connections at a specific company with specified connection degree with LinkedIn',
         parameters: z.object({
-          companyName: z.string().describe('The company name to search for'),
+          companyName: z.string().describe('The company name to search for (not the product name)'),
           degree: z.enum(['first', 'second']).describe('Connection degree (first or second)'),
         }),
         execute: async ({ companyName, degree }) => {
@@ -408,7 +414,10 @@ export class SDR {
         description: 'Find a LinkedIn profile by name',
         parameters: z.object({
           personName: z.string().describe('The person name to search for'),
-          companyName: z.string().optional().describe('Optional company name to filter results'),
+          companyName: z
+            .string()
+            .optional()
+            .describe('Optional company name to filter results (not the product name)'),
         }),
         execute: async ({ personName, companyName }) => {
           const profile = await this.findProfile(personName, companyName)
@@ -423,7 +432,9 @@ export class SDR {
           companyName: z
             .string()
             .optional()
-            .describe('Optional (but very helpful!) company name to filter results'),
+            .describe(
+              'Optional (but very helpful!) company name to filter results (not the product name)',
+            ),
         }),
         execute: async ({ personName, companyName }) => {
           const connections = await this.findMutualConnections(personName, companyName)
@@ -457,23 +468,24 @@ export class SDR {
         },
       }),
 
-      deepResearch: tool({
-        description: 'Perform deep research on a topic',
-        parameters: z.object({
-          query: z.string().describe('The research query or topic to investigate'),
-          maxDepth: z.number().optional().describe('Maximum research depth (1-10)'),
-          timeLimit: z.number().optional().describe('Time limit in seconds (30-300)'),
-          maxUrls: z.number().optional().describe('Maximum URLs to analyze'),
-        }),
-        execute: async ({ query, maxDepth, timeLimit, maxUrls }) => {
-          const researchData = await this.performResearch(query, {
-            maxDepth,
-            timeLimit,
-            maxUrls,
-          })
-          return researchData.text
-        },
-      }),
+      // Disable for local agent.
+      // deepResearch: tool({
+      //   description: 'Perform deep research on a topic',
+      //   parameters: z.object({
+      //     query: z.string().describe('The research query or topic to investigate'),
+      //     maxDepth: z.number().optional().describe('Maximum research depth (1-10)'),
+      //     timeLimit: z.number().optional().describe('Time limit in seconds (30-300)'),
+      //     maxUrls: z.number().optional().describe('Maximum URLs to analyze'),
+      //   }),
+      //   execute: async ({ query, maxDepth, timeLimit, maxUrls }) => {
+      //     const researchData = await this.performResearch(query, {
+      //       maxDepth,
+      //       timeLimit,
+      //       maxUrls,
+      //     })
+      //     return researchData.text
+      //   },
+      // }),
 
       runAgentOnEachCompany: tool({
         description:

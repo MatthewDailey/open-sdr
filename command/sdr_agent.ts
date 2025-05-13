@@ -26,7 +26,7 @@ export async function runSdrAgent(
   prompt: string,
   options: { logToConsole: boolean },
 ): Promise<SDRAgentResult> {
-  console.log(chalk.yellow('\n\nStarting SDR agent with prompt:\n```\n', prompt, '\n```\n'))
+  console.log(chalk.yellow(`\n\n<start_sdr_agent>\n${prompt}\n</start_sdr_agent>\n`))
 
   let chatLog = ''
 
@@ -70,7 +70,7 @@ export async function runSdrAgent(
               if (options.logToConsole) console.log(resultJson.trim())
             }
 
-            const separator = '=======================\n\n'
+            const separator = '=====================\n\n'
             chatLog += separator
             if (options.logToConsole) console.log(separator.trim())
           }
@@ -110,7 +110,7 @@ export async function runSdrAgentOnEachCompany(
   const results = []
 
   for (const listItem of listItems) {
-    const result = await runSdrAgent(`Company: ${listItem}\n\nTask: ${task}`, {
+    const result = await runSdrAgent(`Name: ${listItem}\n\nTask: ${task}`, {
       logToConsole: true,
     })
     results.push({ ...result, company: listItem })
@@ -121,10 +121,7 @@ export async function runSdrAgentOnEachCompany(
 
 async function extractListAndTasks(prompt: string): Promise<{ listItems: string[]; task: string }> {
   try {
-    // Create a new instance of GoogleAI
     const googleAI = new GoogleAI()
-
-    // Define the schema for extracting companies and task
     const schema = z.object({
       listItems: z
         .array(z.string().min(1))
@@ -134,7 +131,7 @@ async function extractListAndTasks(prompt: string): Promise<{ listItems: string[
         .string()
         .min(1)
         .describe(
-          'The main task to complete. Should be verbatim the user prompt except to edit out the companies.',
+          'The main task to complete with all additional instructions. Should be verbatim the user prompt except to edit out the companies.',
         ),
     })
 

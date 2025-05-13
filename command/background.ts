@@ -16,7 +16,8 @@ const PersonSchema = z.object({
 
 // Schema for company background information
 const CompanyBackgroundSchema = z.object({
-  name: z.string().describe('Official company name'),
+  companyName: z.string().describe('Official company name'),
+  productName: z.string().describe('Product name'),
   homepageUrl: z.string().describe('Company homepage URL'),
   linkedinUrl: z.string().describe('Company LinkedIn page URL'),
   productDescription: z.string().describe("Description of the company's main products or services"),

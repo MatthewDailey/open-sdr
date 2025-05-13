@@ -35,6 +35,11 @@ const mcpCommands = [
     name: 'open-sdr',
     command: ['npx', '-y', 'mcp-remote@0.1.0-0', 'http://localhost:3000/mcp'],
   },
+  {
+    name: 'ref-tools',
+    command: ['npx', '-y', 'ref-tools-mcp'],
+    env: { REF_ALPHA: 'open-sdr-ref' },
+  },
 ]
 
 export enum OpenSdrMode {
@@ -55,17 +60,19 @@ export async function startClientAndGetTools(
   const allTools: Record<string, Tool> = {}
 
   // Create a client for each MCP command
-  for (const { name, command } of mcpCommands) {
+  for (const { name, command, env } of mcpCommands) {
     if (name === 'open-sdr' && openSdrMode !== OpenSdrMode.REMOTE) {
       continue
     }
+
+    const baseEnv = { ...process.env, NODE_ENV: 'development' }
 
     // Create a client with the appropriate transport
     const client = await experimental_createMCPClient({
       transport: new StdioClientTransport({
         command: command[0],
         args: command.slice(1),
-        env: { ...process.env, NODE_ENV: 'development' },
+        env: env ? { ...baseEnv, ...env } : baseEnv,
       }),
     })
 
