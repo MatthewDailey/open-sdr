@@ -2,14 +2,13 @@
  * @fileoverview Sales Development Representative automation tools.
  */
 
-import { LinkedIn, type Profile } from './linkedin.js'
-import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { z } from 'zod'
+import { writeMarkdown } from '../utils/write'
 import { gatherCompanyBackground, type CompanyBackground } from './background.js'
 import { createFirecrawlClient, type Activity, type DeepResearchData } from './firecrawl.js'
+import { LinkedIn, type Profile } from './linkedin.js'
 import { runSdrAgentOnEachCompany, type SDRAgentResult } from './sdr_agent'
-import { writeMarkdown, type WriteMarkdownResult } from '../utils/write'
 
 export type SDRResult<T> = {
   text: string
@@ -202,192 +201,182 @@ export class SDR {
    * Starts an MCP server as a background process using StreamableHTTPServerTransport
    * @returns URL of the MCP server
    */
-  async startMcpServer(): Promise<{ server: McpServer; transport: StreamableHTTPServerTransport }> {
-    try {
-      const server = new McpServer({
-        name: 'open-sdr',
-        version: '0.0.1',
-      })
+  async startMcpServer(): Promise<McpServer> {
+    const server = new McpServer({
+      name: 'open-sdr',
+      version: '0.0.1',
+    })
 
-      server.tool(
-        'findLinkedinConnectionsAt',
-        'Find connections at a specific company with specified connection degree with LinkedIn',
-        {
-          companyName: z.string().describe('The company name to search for'),
-          degree: z.enum(['first', 'second']).describe('Connection degree (first or second)'),
-        },
-        async ({ companyName, degree }) => {
-          const profiles = await this.findConnectionsAtCompany(companyName, degree)
-          return {
-            content: [
-              {
-                type: 'text',
-                text: profiles.text,
-              },
-            ],
-          }
-        },
-      )
+    server.tool(
+      'findLinkedinConnectionsAt',
+      'Find connections at a specific company with specified connection degree with LinkedIn',
+      {
+        companyName: z.string().describe('The company name to search for'),
+        degree: z.enum(['first', 'second']).describe('Connection degree (first or second)'),
+      },
+      async ({ companyName, degree }) => {
+        const profiles = await this.findConnectionsAtCompany(companyName, degree)
+        return {
+          content: [
+            {
+              type: 'text',
+              text: profiles.text,
+            },
+          ],
+        }
+      },
+    )
 
-      server.tool(
-        'findProfile',
-        'Find a LinkedIn profile by name',
-        {
-          personName: z.string().describe('The person name to search for'),
-          companyName: z.string().optional().describe('Optional company name to filter results'),
-        },
-        async ({ personName, companyName }) => {
-          const profiles = await this.findProfile(personName, companyName)
-          return {
-            content: [
-              {
-                type: 'text',
-                text: profiles.text,
-              },
-            ],
-          }
-        },
-      )
+    server.tool(
+      'findProfile',
+      'Find a LinkedIn profile by name',
+      {
+        personName: z.string().describe('The person name to search for'),
+        companyName: z.string().optional().describe('Optional company name to filter results'),
+      },
+      async ({ personName, companyName }) => {
+        const profiles = await this.findProfile(personName, companyName)
+        return {
+          content: [
+            {
+              type: 'text',
+              text: profiles.text,
+            },
+          ],
+        }
+      },
+    )
 
-      server.tool(
-        'findMutualConnections',
-        'Find mutual connections with a person on LinkedIn',
-        {
-          personName: z.string().describe('The person name to search for'),
-          companyName: z
-            .string()
-            .optional()
-            .describe('Optional (but very helpful!) company name to filter results'),
-        },
-        async ({ personName, companyName }) => {
-          const connections = await this.findMutualConnections(personName, companyName)
-          return {
-            content: [
-              {
-                type: 'text',
-                text: connections.text,
-              },
-            ],
-          }
-        },
-      )
+    server.tool(
+      'findMutualConnections',
+      'Find mutual connections with a person on LinkedIn',
+      {
+        personName: z.string().describe('The person name to search for'),
+        companyName: z
+          .string()
+          .optional()
+          .describe('Optional (but very helpful!) company name to filter results'),
+      },
+      async ({ personName, companyName }) => {
+        const connections = await this.findMutualConnections(personName, companyName)
+        return {
+          content: [
+            {
+              type: 'text',
+              text: connections.text,
+            },
+          ],
+        }
+      },
+    )
 
-      server.tool(
-        'researchCompany',
-        'Gather comprehensive background information about a company',
-        {
-          companyName: z.string().describe('The company name to research'),
-          companyContext: z
-            .string()
-            .optional()
-            .describe(
-              'Additional context about the company to help with research (eg "they are a startup", "they are in AI")',
-            ),
-          peopleGuidance: z
-            .string()
-            .optional()
-            .describe(
-              'Specific focus for researching people at the company (eg "business founders", "software engineers"',
-            ),
-        },
-        async ({ companyName, companyContext, peopleGuidance }) => {
-          const companyData = await this.gatherCompanyBackground(companyName, {
-            companyContext,
-            peopleGuidance,
-          })
+    server.tool(
+      'researchCompany',
+      'Gather comprehensive background information about a company',
+      {
+        companyName: z.string().describe('The company name to research'),
+        companyContext: z
+          .string()
+          .optional()
+          .describe(
+            'Additional context about the company to help with research (eg "they are a startup", "they are in AI")',
+          ),
+        peopleGuidance: z
+          .string()
+          .optional()
+          .describe(
+            'Specific focus for researching people at the company (eg "business founders", "software engineers"',
+          ),
+      },
+      async ({ companyName, companyContext, peopleGuidance }) => {
+        const companyData = await this.gatherCompanyBackground(companyName, {
+          companyContext,
+          peopleGuidance,
+        })
 
-          return {
-            content: [
-              {
-                type: 'text',
-                text: companyData.text,
-              },
-            ],
-          }
-        },
-      )
+        return {
+          content: [
+            {
+              type: 'text',
+              text: companyData.text,
+            },
+          ],
+        }
+      },
+    )
 
-      server.tool(
-        'deepResearch',
-        'Perform deep research on a topic',
-        {
-          query: z.string().describe('The research query or topic to investigate'),
-          maxDepth: z.number().optional().describe('Maximum research depth (1-10)'),
-          timeLimit: z.number().optional().describe('Time limit in seconds (30-300)'),
-          maxUrls: z.number().optional().describe('Maximum URLs to analyze'),
-        },
-        async ({ query, maxDepth, timeLimit, maxUrls }) => {
-          const researchData = await this.performResearch(query, {
-            maxDepth,
-            timeLimit,
-            maxUrls,
-          })
-          return {
-            content: [
-              {
-                type: 'text',
-                text: researchData.text,
-              },
-            ],
-          }
-        },
-      )
+    server.tool(
+      'deepResearch',
+      'Perform deep research on a topic',
+      {
+        query: z.string().describe('The research query or topic to investigate'),
+        maxDepth: z.number().optional().describe('Maximum research depth (1-10)'),
+        timeLimit: z.number().optional().describe('Time limit in seconds (30-300)'),
+        maxUrls: z.number().optional().describe('Maximum URLs to analyze'),
+      },
+      async ({ query, maxDepth, timeLimit, maxUrls }) => {
+        const researchData = await this.performResearch(query, {
+          maxDepth,
+          timeLimit,
+          maxUrls,
+        })
+        return {
+          content: [
+            {
+              type: 'text',
+              text: researchData.text,
+            },
+          ],
+        }
+      },
+    )
 
-      server.tool(
-        'runAgentOnEachCompany',
-        'Run the SDR agent for each company mentioned in the prompt. This should be used when the user wants something done for multiple companies to make sure each is handled completely.',
-        {
-          prompt: z.string().describe('The prompt containing companies and task information'),
-        },
-        async ({ prompt }) => {
-          const result = await this.runAgentOnEachCompany(prompt)
-          return {
-            content: [
-              {
-                type: 'text',
-                text: result.text,
-              },
-            ],
-          }
-        },
-      )
+    server.tool(
+      'runAgentOnEachCompany',
+      'Run the SDR agent for each company mentioned in the prompt. This should be used when the user wants something done for multiple companies to make sure each is handled completely.',
+      {
+        prompt: z.string().describe('The prompt containing companies and task information'),
+      },
+      async ({ prompt }) => {
+        const result = await this.runAgentOnEachCompany(prompt)
+        return {
+          content: [
+            {
+              type: 'text',
+              text: result.text,
+            },
+          ],
+        }
+      },
+    )
 
-      server.tool(
-        'writeSdrNotes',
-        'Write markdown content to a file in the SDR notes directory. This should be used for the agent to output a summary of its work or when requested to save a file.',
-        {
-          content: z.string().describe('The markdown content to write to the file'),
-          filename: z
-            .string()
-            .optional()
-            .describe('Optional filename (without extension) to use for the file'),
-          subdirectory: z
-            .string()
-            .optional()
-            .describe('Optional subdirectory within SDR notes to store the file'),
-        },
-        async ({ content, filename, subdirectory }) => {
-          const result = await writeMarkdown(content, { filename, subdirectory })
-          return {
-            content: [
-              {
-                type: 'text',
-                text: `Successfully wrote markdown to file: ${result.filePath}`,
-              },
-            ],
-          }
-        },
-      )
+    server.tool(
+      'writeSdrNotes',
+      'Write markdown content to a file in the SDR notes directory. This should be used for the agent to output a summary of its work or when requested to save a file.',
+      {
+        content: z.string().describe('The markdown content to write to the file'),
+        filename: z
+          .string()
+          .optional()
+          .describe('Optional filename (without extension) to use for the file'),
+        subdirectory: z
+          .string()
+          .optional()
+          .describe('Optional subdirectory within SDR notes to store the file'),
+      },
+      async ({ content, filename, subdirectory }) => {
+        const result = await writeMarkdown(content, { filename, subdirectory })
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Successfully wrote markdown to file: ${result.filePath}`,
+            },
+          ],
+        }
+      },
+    )
 
-      const transport = new StreamableHTTPServerTransport({
-        sessionIdGenerator: undefined, // disables session management
-      })
-      await server.connect(transport)
-
-      return { server, transport }
-    } catch (error) {
-      console.error('Error starting MCP server:', error)
-      throw error
-    }
+    return server
   }
 }

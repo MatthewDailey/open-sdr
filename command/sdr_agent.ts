@@ -5,7 +5,7 @@
 
 import chalk from 'chalk'
 import { doAgentLoop } from './agent'
-import { startClientAndGetTools } from './mcp'
+import { OpenSdrMode, startClientAndGetTools } from './mcp'
 import { GoogleAI } from './google'
 import { z } from 'zod'
 import { generateText } from 'ai'
@@ -31,7 +31,7 @@ export async function runSdrAgent(
     // Log to chatLog instead of console
     chatLog += 'Loading MCP tools...\n'
     if (options.logToConsole) console.log('Loading MCP tools...')
-    const { tools } = await startClientAndGetTools()
+    const { tools } = await startClientAndGetTools(OpenSdrMode.LOCAL)
     chatLog += 'MCP tools loaded successfully.\n'
     if (options.logToConsole) console.log('MCP tools loaded successfully.')
 

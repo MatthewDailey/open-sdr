@@ -5,6 +5,7 @@
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 import { experimental_createMCPClient } from 'ai'
 import { type Tool } from 'ai'
+import { SDR } from './sdr'
 
 const mcpCommands = [
   ////////////////////////////////
@@ -18,12 +19,12 @@ const mcpCommands = [
   //   command: ['npx', '-y', '@notionhq/notion-mcp-server'],
   // },
   // {
-  //   name: 'apify-web-scraper',
-  //   command: ['npx', '-y', '@apify/actors-mcp-server', '--actors', 'apify/web-scraper'],
-  // },
-  // {
   //   name: 'ref-tools',
   //   command: ['npx', '-y', 'ref-tools-mcp'],
+  // },
+  // {
+  //   name: 'firecrawl',
+  //   command: ['npx', '-y', 'firecrawl-mcp'],
   // },
   ////////////////////////////////
   {
@@ -34,18 +35,21 @@ const mcpCommands = [
     name: 'open-sdr',
     command: ['npx', '-y', 'mcp-remote@0.1.0-0', 'http://localhost:3000/mcp'],
   },
-  // {
-  //   name: 'firecrawl',
-  //   command: ['npx', '-y', 'firecrawl-mcp'],
-  // },
 ]
+
+export enum OpenSdrMode {
+  REMOTE = 'remote',
+  LOCAL = 'local',
+}
 
 /**
  * Starts MCP clients for the predefined commands and returns the clients and their tools.
  *
  * @returns A promise that resolves to an object containing the MCP clients and their tools.
  */
-export async function startClientAndGetTools(): Promise<{
+export async function startClientAndGetTools(
+  openSdrMode: OpenSdrMode = OpenSdrMode.REMOTE,
+): Promise<{
   tools: Record<string, Tool>
 }> {
   console.log('Starting MCP clients...')
@@ -73,6 +77,26 @@ export async function startClientAndGetTools(): Promise<{
     Object.assign(allTools, prefixedClientTools)
 
     console.log(`Added tools from ${name}: ${Object.keys(prefixedClientTools).join(', ')}`)
+  }
+
+  if (openSdrMode === OpenSdrMode.LOCAL) {
+    // TODO: Implement local open-sdr server
+    // console.log('Starting local open-sdr server...')
+    // const sdr = new SDR()
+    // const mcpServer = await sdr.startMcpServer()
+    // // Create a transport for the MCP server
+    // const transport = new StdioClientTransport()
+    // // Connect the transport to the MCP server
+    // await mcpServer.connect(transport)
+    // const openSdrClient = await experimental_createMCPClient({
+    //   transport,
+    // })
+    // const openSdrTools = await openSdrClient.tools()
+    // const prefixedClientTools = Object.fromEntries(
+    //   Object.entries(openSdrTools).map(([key, tool]) => ['open-sdr_' + key, tool]),
+    // )
+    // Object.assign(allTools, prefixedClientTools)
+    // console.log(`Added tools from open-sdr: ${Object.keys(prefixedClientTools).join(', ')}`)
   }
 
   console.log('All MCP clients ready.')

@@ -57,7 +57,8 @@ company_background(company or tool name) -> deep research + structured extract
   - `sdr agent <prompt file>`
 [x] loop over companies tool to ensure we hit every one 
   - spawn a sub-agent per company with a command and then aggregates the results
-[] test everything
+[x] test everything
+[] no remote server for cli agent
 [] connect a golden path workflow
 
 [] niceties

@@ -13,6 +13,7 @@ import yaml from 'js-yaml'
 import path from 'path'
 import { validateWorkflow } from './validate_workflow'
 import { getToolsLazy } from './singleton_mcp_server'
+import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
 
 export async function createApp() {
   const app = express()
@@ -48,7 +49,13 @@ export async function createApp() {
 
   app.all('/api/mcp', async (req, res) => {
     const sdr = new SDR()
-    const { server, transport } = await sdr.startMcpServer()
+    const server = await sdr.startMcpServer()
+
+    const transport = new StreamableHTTPServerTransport({
+      sessionIdGenerator: undefined, // disables session management
+    })
+    await server.connect(transport)
+
     transport.handleRequest(req, res, req.body)
     res.on('close', () => {
       transport.close()
