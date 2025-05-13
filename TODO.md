@@ -60,17 +60,18 @@ company_background(company or tool name) -> deep research + structured extract
 [x] test everything
 [x] no remote server for cli agent
 [x] connect a golden path workflow
+[x] use gemini for agent loop to handle more tokens
 [] try running it on a larger suite
+[] try "find a list of ai coding tool"
 
 [] niceties
-  [] open message link to person?
+  [] open message link to person? (have puppeteer open a dom node including background on this person)
   [] update mcp config to allow including only sepecific tools for other servers
-  [] rename "Chrome for Testing" to "Chrome for OpenSDR"
-  [] login cli should have nicer messaging
+  [] login cli should have nicer messaging (eg you're now logged in)
   [] chat UX for `sdr agent`
 [] MCP explorations
   [x] write file tool to save results (eg as csv)
-  [] google sheets
+  [] google sheets (company, person, warm intro)
   [] try adding an email enrichment service
   [] try adding store to notion (after allowing filter tools)
 [] publishing

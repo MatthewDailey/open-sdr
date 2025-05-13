@@ -3,6 +3,7 @@
  */
 
 import { anthropic } from '@ai-sdk/anthropic'
+import { google } from '@ai-sdk/google'
 import { streamText, type StreamTextOnStepFinishCallback, type ToolSet } from 'ai'
 
 /**
@@ -30,7 +31,7 @@ export async function doAgentLoop(
 
   // console.log('Tools:', tools)
   const { textStream, fullStream } = streamText({
-    model: anthropic('claude-3-7-sonnet-latest'),
+    model: google('gemini-2.0-flash'),
     system: prompt.system,
     prompt: prompt.user,
     tools,
