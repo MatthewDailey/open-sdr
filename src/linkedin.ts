@@ -2,7 +2,7 @@
  * @fileoverview LinkedIn automation tools using Puppeteer.
  */
 
-import { Page, type Cookie } from 'puppeteer'
+import { Browser, Page, type Cookie } from 'puppeteer'
 import puppeteer from 'puppeteer-extra'
 import StealthPlugin from 'puppeteer-extra-plugin-stealth'
 import fs from 'fs'
@@ -174,7 +174,7 @@ export class LinkedIn {
 
         await page.keyboard.type(message)
       },
-      { headless: false },
+      { headless: false, useExistingBrowser: true },
     )
   }
 
@@ -259,16 +259,24 @@ export class LinkedIn {
   private async withLinkedin<T>(
     url: string,
     fn: (page: Page) => Promise<T>,
-    options: { headless: boolean } = { headless: true },
+    options: { headless: boolean; useExistingBrowser: boolean } = {
+      headless: true,
+      useExistingBrowser: false,
+    },
   ) {
-    const browser = await puppeteer.launch({
-      headless: options.headless,
-      defaultViewport: options.headless ? { width: 1280, height: 800 } : null,
-      args: options.headless ? ['--window-size=1280,800'] : [],
-    })
+    const browser =
+      options.useExistingBrowser && this.browser
+        ? this.browser
+        : await puppeteer.launch({
+            headless: options.headless,
+            defaultViewport: options.headless ? { width: 1280, height: 800 } : null,
+            args: options.headless ? ['--window-size=1280,800'] : [],
+          })
+    this.browser = browser
 
     const pages = await browser.pages()
-    const page = pages.length > 0 ? pages[0] : await browser.newPage()
+    const page =
+      pages.length > 0 && !options.useExistingBrowser ? pages[0] : await browser.newPage()
 
     try {
       if (fs.existsSync(this.cookiesPath)) {
@@ -298,6 +306,9 @@ export class LinkedIn {
       return result
     } finally {
       await browser.close()
+      this.browser = undefined
     }
   }
+
+  private browser: Browser | undefined = undefined
 }

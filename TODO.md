@@ -69,11 +69,13 @@ company_background(company or tool name) -> deep research + structured extract
 [] try running it on a larger suite
 [x] messaging workflow - given a profile, open message link to person? (have puppeteer open a dom node including background on this person)
   - aria-label message
+[] make message more stable than using name
+[] make message not die if no message
 
 [] publishing
   [x] read env from .env (implemented, validate this)
   [] add binary for global install
-  [] delete the hackathon web app
+  [x] delete the hackathon web app
   [x] move my prompts to sample prompt area
   [x] unify tool definitions (try result: string from MCP ones with claude)
 [] login cli should have nicer messaging (eg you're now logged in)

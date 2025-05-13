@@ -38,7 +38,7 @@ yargs(hideBin(process.argv))
       const promptFilePath = argv.promptFilePath as string
       const prompt = fs.readFileSync(promptFilePath, 'utf8')
       await runSdrAgent(prompt, { logToConsole: true })
-      process.exit(0)
+      console.log('\n\nDone. Ctrl-C to exit.')
     },
   )
   .command('server', 'Start the MCP server', {}, async () => {
