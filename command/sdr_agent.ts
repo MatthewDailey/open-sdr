@@ -10,6 +10,7 @@ import { doAgentLoop } from './agent'
 import { GoogleAI } from './google'
 import { OpenSdrMode, startClientAndGetTools } from './mcp'
 import { SDR } from './sdr'
+import chalk from 'chalk'
 
 export type SDRAgentResult = {
   chatLog: string
@@ -25,7 +26,7 @@ export async function runSdrAgent(
   prompt: string,
   options: { logToConsole: boolean },
 ): Promise<SDRAgentResult> {
-  console.log('Starting SDR agent with prompt:\n```\n', prompt, '\n```\n\n')
+  console.log(chalk.yellow('\n\nStarting SDR agent with prompt:\n```\n', prompt, '\n```\n'))
 
   let chatLog = ''
 
@@ -44,7 +45,7 @@ export async function runSdrAgent(
         if (step.toolCalls.length > 0) {
           for (let i = 0; i < step.toolCalls.length; i++) {
             const toolCall = step.toolCalls[i]
-            const toolResult = step.toolResults[i]
+            const toolResult = step.toolResults[i] as { result: string }
             const toolLogEntry = `\n====== ${toolCall.toolName} ======\n`
             chatLog += toolLogEntry
             if (options.logToConsole) console.log('\n' + toolLogEntry.trim())
@@ -59,9 +60,15 @@ export async function runSdrAgent(
             chatLog += resultHeader
             if (options.logToConsole) console.log(resultHeader.trim())
 
-            const resultJson = JSON.stringify(toolResult, null, 2) + '\n'
-            chatLog += resultJson
-            if (options.logToConsole) console.log(resultJson.trim())
+            if (toolResult.result && typeof toolResult.result === 'string') {
+              const resultStr = toolResult.result + '\n'
+              chatLog += resultStr
+              if (options.logToConsole) console.log(resultStr.trim())
+            } else {
+              const resultJson = JSON.stringify(toolResult, null, 2) + '\n'
+              chatLog += resultJson
+              if (options.logToConsole) console.log(resultJson.trim())
+            }
 
             const separator = '=======================\n\n'
             chatLog += separator
@@ -72,7 +79,7 @@ export async function runSdrAgent(
       (chunk) => {
         // Append text chunks to chatLog instead of streaming to console
         chatLog += chunk
-        if (options.logToConsole) process.stdout.write(chunk)
+        if (options.logToConsole) process.stdout.write(chalk.green(chunk))
       },
       tools, // Pass the MCP tools to the agent loop
     )
@@ -99,36 +106,43 @@ export type SDRAgentResultWithCompany = SDRAgentResult & {
 export async function runSdrAgentOnEachCompany(
   prompt: string,
 ): Promise<SDRAgentResultWithCompany[]> {
-  const { companies, task } = await getCompaniesAndTask(prompt)
+  const { listItems, task } = await extractListAndTasks(prompt)
   const results = []
 
-  for (const company of companies) {
-    const result = await runSdrAgent(`\n\nCompany: ${company}\n\nTask: ${task}`, {
+  for (const listItem of listItems) {
+    const result = await runSdrAgent(`Company: ${listItem}\n\nTask: ${task}`, {
       logToConsole: true,
     })
-    results.push({ ...result, company })
+    results.push({ ...result, company: listItem })
   }
 
   return results
 }
 
-async function getCompaniesAndTask(prompt: string): Promise<{ companies: string[]; task: string }> {
+async function extractListAndTasks(prompt: string): Promise<{ listItems: string[]; task: string }> {
   try {
     // Create a new instance of GoogleAI
     const googleAI = new GoogleAI()
 
     // Define the schema for extracting companies and task
     const schema = z.object({
-      companies: z.array(z.string().min(1)).min(1),
-      task: z.string().min(1),
+      listItems: z
+        .array(z.string().min(1))
+        .min(1)
+        .describe('The list of items (eg companies) to process'),
+      task: z
+        .string()
+        .min(1)
+        .describe(
+          'The main task to complete. Should be verbatim the user prompt except to edit out the companies.',
+        ),
     })
 
     // Extract companies and task from the prompt
     const result = await googleAI.generateStructuredData(
-      `Extract the list of companies and the main task from the following prompt. Make the task as specific as possible.
-      If no companies are explicitly mentioned, return an empty array.
+      `You are provided a prompt that asks to do some task for each element of a list. Extract the list of elements and the main task from the following prompt. The task should be verbatim the user prompt except to edit out the companies.
       
-      Prompt: ${prompt}`,
+      Prompt: \n${prompt}`,
       schema,
     )
 
@@ -136,6 +150,6 @@ async function getCompaniesAndTask(prompt: string): Promise<{ companies: string[
   } catch (error) {
     console.error('Error extracting companies and task:', error)
     // Return empty defaults in case of error
-    return { companies: [], task: '' }
+    return { listItems: [], task: '' }
   }
 }

@@ -62,6 +62,7 @@ company_background(company or tool name) -> deep research + structured extract
 [x] connect a golden path workflow
 [x] use gemini for agent loop to handle more tokens
   -> undo, seems bad
+[] make sure all workflow steps are passed through verbatim to the inner agent
 [] try running it on a larger suite
 [] try "find a list of ai coding tool"
 
@@ -78,7 +79,7 @@ company_background(company or tool name) -> deep research + structured extract
 [] publishing
   [] read env from .env (implemented, validate this)
   [] clean up logs
-  [] generate landing page (simpleanalytics) and figma sites!
+  [] generate landing page (simpleanalytics) and figma sites! (link to ref at bottom)
   [] add binary for global install
   [] delete the hackathon web app
   [] setup steps: firecrawl, gemini, anthropic

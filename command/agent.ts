@@ -31,8 +31,8 @@ export async function doAgentLoop(
 
   // console.log('Tools:', tools)
   const { textStream, fullStream } = streamText({
-    // model: anthropic('claude-3-5-sonnet-latest'),
-    model: google('gemini-2.5-pro-preview-05-06'),
+    model: anthropic('claude-3-5-sonnet-latest'),
+    // model: google('gemini-2.5-pro-preview-05-06'),
     system: prompt.system,
     prompt: prompt.user,
     tools,

@@ -110,7 +110,7 @@ export class SDR {
   ): Promise<SDRResult<CompanyBackground>> {
     const data = await gatherCompanyBackground(companyName, options)
 
-    let text = `==== COMPANY BACKGROUND ====\n\n`
+    let text = `==== COMPANY BACKGROUND ====\n`
     text += `Name: ${data.name}\n`
     text += `Website: ${data.homepageUrl}\n`
     text += `LinkedIn: ${data.linkedinUrl}\n\n`
@@ -336,7 +336,11 @@ export class SDR {
       'runAgentOnEachCompany',
       'Run the SDR agent for each company mentioned in the prompt. This should be used when the user wants something done for multiple companies to make sure each is handled completely.',
       {
-        prompt: z.string().describe('The prompt containing companies and task information'),
+        prompt: z
+          .string()
+          .describe(
+            'The prompt containing companies and task information. This should be verbatim the user prompt.',
+          ),
       },
       async ({ prompt }) => {
         const result = await this.runAgentOnEachCompany(prompt)
@@ -475,7 +479,11 @@ export class SDR {
         description:
           'Run the SDR agent for each company mentioned in the prompt. This should be used when the user wants something done for multiple companies to make sure each is handled completely.',
         parameters: z.object({
-          prompt: z.string().describe('The prompt containing companies and task information'),
+          prompt: z
+            .string()
+            .describe(
+              'The prompt containing companies and task information. This should be verbatim the user prompt.',
+            ),
         }),
         execute: async ({ prompt }) => {
           const result = await this.runAgentOnEachCompany(prompt)
