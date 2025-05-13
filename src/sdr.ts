@@ -4,11 +4,11 @@
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { z } from 'zod'
-import { writeMarkdown } from './write'
+import { writeMarkdown } from './write.js'
 import { gatherCompanyBackground, type CompanyBackground } from './background.js'
 import { createFirecrawlClient, type Activity, type DeepResearchData } from './firecrawl.js'
 import { LinkedIn, type Profile } from './linkedin.js'
-import { runSdrAgentOnEachCompany, type SDRAgentResult } from './sdr_agent'
+import { runSdrAgentOnEachCompany, type SDRAgentResult } from './sdr_agent.js'
 import { tool } from 'ai'
 
 export type SDRResult<T> = {

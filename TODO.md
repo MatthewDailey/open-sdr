@@ -98,6 +98,7 @@ content:
 [] server demo video
 [] list of tools provided (visual between these?)
 [] landing page og: tags that work
+[] note about test browser
 
 stretch
 [] chat UX for `sdr agent`

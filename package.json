@@ -1,8 +1,19 @@
 {
   "name": "open-sdr",
   "type": "module",
+  "version": "0.0.2",
+  "bin": {
+    "sdr": "./dist/src/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "sdr": "tsx src/cli.ts",
+    "build": "tsc --outDir dist",
+    "prepare": "npm run build",
     "test": "vitest",
     "format": "prettier --write .",
     "check": "tsc --noEmit",

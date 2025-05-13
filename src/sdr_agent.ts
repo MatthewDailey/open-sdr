@@ -6,10 +6,10 @@
 import { google } from '@ai-sdk/google'
 import { generateText } from 'ai'
 import { z } from 'zod'
-import { doAgentLoop } from './agent'
-import { GoogleAI } from './google'
-import { OpenSdrMode, startClientAndGetTools } from './mcp'
-import { SDR } from './sdr'
+import { doAgentLoop } from './agent.js'
+import { GoogleAI } from './google.js'
+import { OpenSdrMode, startClientAndGetTools } from './mcp.js'
+import { SDR } from './sdr.js'
 import chalk from 'chalk'
 
 export type SDRAgentResult = {

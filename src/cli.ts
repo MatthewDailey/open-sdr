@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /**
  * @fileoverview This file defines a command-line interface using yargs. It provides commands
  * for various SDR (Sales Development Representative) operations including an AI agent loop.
@@ -8,8 +10,8 @@ import dotenv from 'dotenv'
 import fs from 'fs'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
-import { startMcpServer } from './server'
-import { SDR } from './sdr'
+import { startMcpServer } from './server.js'
+import { SDR } from './sdr.js'
 import { runSdrAgent } from './sdr_agent.js'
 
 if (fs.existsSync('.env')) {

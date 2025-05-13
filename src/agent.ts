@@ -3,7 +3,6 @@
  */
 
 import { anthropic } from '@ai-sdk/anthropic'
-import { google } from '@ai-sdk/google'
 import { streamText, type StreamTextOnStepFinishCallback, type ToolSet } from 'ai'
 
 /**

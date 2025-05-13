@@ -1,0 +1,22 @@
+# Source files (will be built into dist)
+src
+
+# Development files
+.github
+.vscode
+node_modules
+.env
+.awolf
+linkedin-cookies.json
+research_results.json
+queries
+sdr_notes
+
+# Test files
+**/*.test.ts
+**/*.spec.ts
+**/test/
+**/tests/
+
+# Don't ignore dist directory (needed for binary)
+!dist 

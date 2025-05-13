@@ -3,8 +3,8 @@
  */
 
 import { z } from 'zod'
-import { createFirecrawlClient } from './firecrawl'
-import { GoogleAI } from './google'
+import { createFirecrawlClient } from './firecrawl.js'
+import { GoogleAI } from './google.js'
 import chalk from 'chalk'
 
 // Schema for person information

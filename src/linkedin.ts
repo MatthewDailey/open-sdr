@@ -7,12 +7,12 @@ import puppeteer from 'puppeteer-extra'
 import StealthPlugin from 'puppeteer-extra-plugin-stealth'
 import fs from 'fs'
 import path from 'path'
-import { cleanUrlQueryParams } from './url'
+import { cleanUrlQueryParams } from './url.js'
 
 puppeteer.use(StealthPlugin())
 
 import { z } from 'zod'
-import { GoogleAI } from './google'
+import { GoogleAI } from './google.js'
 
 export const ProfileSchema = z.object({
   name: z.string(),
