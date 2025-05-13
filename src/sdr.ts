@@ -84,8 +84,8 @@ export class SDR {
         message: z.string().describe('Message text to draft'),
       },
       execute: async function (this: SDR, { name, profileUrl, message }) {
-        const result = await this.draftMessage(name, profileUrl, message)
-        return result.text
+        this.draftMessage(name, profileUrl, message)
+        return 'Opening draft message to ' + name + ' with message: ' + message
       },
     },
     {
