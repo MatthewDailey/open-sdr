@@ -61,6 +61,7 @@ company_background(company or tool name) -> deep research + structured extract
 [x] no remote server for cli agent
 [x] connect a golden path workflow
 [x] use gemini for agent loop to handle more tokens
+  -> undo, seems bad
 [] try running it on a larger suite
 [] try "find a list of ai coding tool"
 
