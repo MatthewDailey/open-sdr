@@ -45,7 +45,7 @@ export async function runSdrAgent(
             const toolResult = step.toolResults[i]
             const toolLogEntry = `\n====== ${toolCall.toolName} ======\n`
             chatLog += toolLogEntry
-            if (options.logToConsole) console.log(toolLogEntry.trim())
+            if (options.logToConsole) console.log('\n' + toolLogEntry.trim())
 
             for (const [key, value] of Object.entries(toolCall.args)) {
               const argLogEntry = `${key}: ${value}\n`
