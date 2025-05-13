@@ -4,7 +4,7 @@
 
 import cors from 'cors'
 import express from 'express'
-import { SDR } from '../command/sdr'
+import { SDR } from './sdr'
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
 
 export async function createMcpApp() {

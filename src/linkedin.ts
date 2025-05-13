@@ -7,7 +7,7 @@ import puppeteer from 'puppeteer-extra'
 import StealthPlugin from 'puppeteer-extra-plugin-stealth'
 import fs from 'fs'
 import path from 'path'
-import { cleanUrlQueryParams } from '../utils/url'
+import { cleanUrlQueryParams } from './url'
 
 puppeteer.use(StealthPlugin())
 

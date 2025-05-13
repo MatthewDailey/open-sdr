@@ -8,7 +8,7 @@ import dotenv from 'dotenv'
 import fs from 'fs'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
-import { startMcpServer } from '../server/mcp'
+import { startMcpServer } from './server'
 import { SDR } from './sdr'
 import { runSdrAgent } from './sdr_agent.js'
 

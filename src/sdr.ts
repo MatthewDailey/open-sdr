@@ -4,7 +4,7 @@
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { z } from 'zod'
-import { writeMarkdown } from '../utils/write'
+import { writeMarkdown } from './write'
 import { gatherCompanyBackground, type CompanyBackground } from './background.js'
 import { createFirecrawlClient, type Activity, type DeepResearchData } from './firecrawl.js'
 import { LinkedIn, type Profile } from './linkedin.js'

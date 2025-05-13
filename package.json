@@ -2,10 +2,7 @@
   "name": "open-sdr",
   "type": "module",
   "scripts": {
-    "build": "vite build",
-    "start": "NODE_ENV=production tsx server/index.ts",
-    "dev": "concurrently \"vite\" \"tsx watch server/index.ts\"",
-    "cli": "tsx command/command.ts",
+    "sdr": "tsx src/cli.ts",
     "test": "vitest",
     "format": "prettier --write .",
     "check": "tsc --noEmit",
