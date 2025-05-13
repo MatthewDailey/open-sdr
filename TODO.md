@@ -50,7 +50,7 @@ company_background(company or tool name) -> deep research + structured extract
 [x] add all MCP tools
 [x] have all SDR functions return objects and markdown answer
 [x] extract research tool
-[] organize commands
+[x] organize commands
   - `sdr login`
   - `sdr tools <command>` 
   - `sdr server`

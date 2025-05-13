@@ -58,10 +58,10 @@ export async function gatherCompanyBackground(
     peopleGuidance = '',
   } = options
   const firecrawlApiKey = process.env.FIRECRAWL_API_KEY
-  const googleApiKey = process.env.GOOGLE_API_KEY
+  const googleApiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY
 
   if (!firecrawlApiKey || !googleApiKey) {
-    throw new Error('Firecrawl and Google API keys are required')
+    throw new Error('FIRECRAWL_API_KEY and GOOGLE_GENERATIVE_AI_API_KEY are required')
   }
 
   const logVerbose = (message: string) => {

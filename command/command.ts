@@ -11,6 +11,7 @@ import { hideBin } from 'yargs/helpers'
 import { doAgentLoop } from './agent'
 import { startClientAndGetTools } from './mcp'
 import { SDR } from './sdr'
+import { startMcpServer } from '../server/mcp'
 
 dotenv.config()
 yargs(hideBin(process.argv))
@@ -63,6 +64,9 @@ yargs(hideBin(process.argv))
       console.log('\n') // Add a newline after completion
     },
   )
+  .command('server', 'Start the MCP server', {}, async () => {
+    await startMcpServer()
+  })
   .command('tools', 'Run various SDR tools', (yargs) => {
     return yargs
       .command(
