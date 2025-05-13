@@ -71,6 +71,7 @@ company_background(company or tool name) -> deep research + structured extract
   - aria-label message
 [] make message more stable than using name
 [] make message not die if no message
+[] search often finds people that do not work at the company - should make it better at this
 
 [] publishing
   [x] read env from .env (implemented, validate this)
@@ -78,7 +79,7 @@ company_background(company or tool name) -> deep research + structured extract
   [x] delete the hackathon web app
   [x] move my prompts to sample prompt area
   [x] unify tool definitions (try result: string from MCP ones with claude)
-  [x] fix `npm warn` issues on install
+  [x ] fix `npm warn` issues on install
 [] login cli should have nicer messaging (eg you're now logged in)
   - hit enter to open linkedin in a browser to login, this is th browser that open-sdr will use. 
   - when done, close the browser

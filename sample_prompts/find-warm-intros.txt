@@ -51,7 +51,7 @@ How to proceed:
 - When a sub-agent finishes, have it speak just to say "finished looking into on <>". It should also write a SDR note about the company that includes linkedin urls.
 - When all sub-agents finish, write an overall summary report to "multi-query.md" with overall summary.
 
-What I want is a list like:
+What I want is a list like the following that should inclue every company on my list above:
 <company1>:
 - <person to talk to> <linkedin url>
   → <person who can give a warm intro> <url>
