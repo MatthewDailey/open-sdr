@@ -1,9 +1,41 @@
 I am building a tool that helps coding agents find and read documentation. I need your help finding leads to talk to at agent development companies. 
 
 Here is a list of things that are either a tool or a company:
-- Cursor
-- Windsurf
-- Zed
+All Hands (Developer Agent Framework) https://docs.all-hands.dev/
+Adept AI (Claude Code) https://www.adept.ai/
+Aider (CLI Coding Assistant) https://aider.chat/
+Artisan AI (Code Generation) https://www.artisan.ai/
+Autify (Test Automation) https://autify.com/
+Beam (AI Development) https://www.beam.cloud/
+Blackbox AI (Code Assistant) https://www.blackbox.ai/
+Bolt.new (Code Scaffolding) https://bolt.new/
+Cline (VS Code Plugin) https://cline.bot/
+Codeum/Windsurf (Privacy-Focused IDE) https://codeium.com/
+CODIRIS (Code Analysis) https://codiris.ai/
+Cognition Labs (Devin) https://cognition.ai/
+Continue.dev (IDE Extension Framework) https://continue.dev/
+Cursor (AI-Native IDE) https://cursor.sh/
+Factory (Development Platform) https://factory.dev/
+Fine.dev (Development Tools) https://fine.dev/
+Goose (Python Framework) https://block.github.io/goose/
+Imbue (AI Development) https://imbue.com/
+Ion Design (Design Tools) https://iondesign.io/
+Kodu.ai (Code Assistant) https://kodu.ai/
+Lovable (Code Generation) https://lovable.ai/
+Magic (Development Platform) https://magic.dev/
+OpenHands (Agent Framework) https://docs.all-hands.dev/
+Poolside (Private Coding Solutions) https://poolside.ai/
+Qodo (AI Development) https://qodo.ai/
+Refact.ai (Code Assistant) https://refact.ai/
+RooCode (a fork of Cline but different)
+Replit (Cloud IDE) https://replit.com/
+Resolve AI/Tusk (Development Tools) https://www.resolveai.co/
+RunWhen (DevOps Automation) https://www.runwhen.com/
+Tabnine (Privacy-First Assistant) https://www.tabnine.com/
+Tessl (Development Tools) https://tessl.dev/
+V0 by Vercel (UI Generation) https://v0.dev/
+Void (Code Editor) https://github.com/voideditor/void
+Zed (Development Environment) https://zed.dev/
 
 Your task is to:
 1. Verify if this is a tool or a company. If it is a tool, find the company name. This is very important so we can find all the correct background and connections
