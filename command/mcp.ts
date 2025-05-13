@@ -32,12 +32,12 @@ const mcpCommands = [
   },
   {
     name: 'open-sdr',
-    command: ['npx', '-y', 'mcp-remote@0.1.0-0', 'http://localhost:3000/api/mcp'],
+    command: ['npx', '-y', 'mcp-remote@0.1.0-0', 'http://localhost:3000/mcp'],
   },
-  {
-    name: 'firecrawl',
-    command: ['npx', '-y', 'firecrawl-mcp'],
-  },
+  // {
+  //   name: 'firecrawl',
+  //   command: ['npx', '-y', 'firecrawl-mcp'],
+  // },
 ]
 
 /**

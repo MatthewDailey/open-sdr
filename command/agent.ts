@@ -28,7 +28,7 @@ export async function doAgentLoop(
 ): Promise<string> {
   let completeText = ''
 
-  console.log('Tools:', tools)
+  // console.log('Tools:', tools)
   const { textStream, fullStream } = streamText({
     model: anthropic('claude-3-5-sonnet-latest'),
     system: prompt.system,

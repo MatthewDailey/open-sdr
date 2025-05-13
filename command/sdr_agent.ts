@@ -21,14 +21,19 @@ export type SDRAgentResult = {
  * @param prompt The prompt to send to the AI agent
  * @returns The complete chat log as a string
  */
-export async function runSdrAgent(prompt: string): Promise<SDRAgentResult> {
+export async function runSdrAgent(
+  prompt: string,
+  options: { logToConsole: boolean },
+): Promise<SDRAgentResult> {
   let chatLog = ''
 
   try {
     // Log to chatLog instead of console
     chatLog += 'Loading MCP tools...\n'
+    if (options.logToConsole) console.log('Loading MCP tools...')
     const { tools } = await startClientAndGetTools()
     chatLog += 'MCP tools loaded successfully.\n'
+    if (options.logToConsole) console.log('MCP tools loaded successfully.')
 
     await doAgentLoop(
       {
@@ -41,23 +46,39 @@ export async function runSdrAgent(prompt: string): Promise<SDRAgentResult> {
           for (let i = 0; i < step.toolCalls.length; i++) {
             const toolCall = step.toolCalls[i]
             const toolResult = step.toolResults[i]
-            chatLog += `\n====== ${toolCall.toolName} ======\n`
+            const toolLogEntry = `\n====== ${toolCall.toolName} ======\n`
+            chatLog += toolLogEntry
+            if (options.logToConsole) console.log(toolLogEntry)
+
             for (const [key, value] of Object.entries(toolCall.args)) {
-              chatLog += `${key}: ${value}\n`
+              const argLogEntry = `${key}: ${value}\n`
+              chatLog += argLogEntry
+              if (options.logToConsole) console.log(argLogEntry)
             }
-            chatLog += '\n======  Result  ======\n'
-            chatLog += JSON.stringify(toolResult, null, 2) + '\n'
-            chatLog += '=======================\n\n'
+
+            const resultHeader = '\n======  Result  ======\n'
+            chatLog += resultHeader
+            if (options.logToConsole) console.log(resultHeader)
+
+            const resultJson = JSON.stringify(toolResult, null, 2) + '\n'
+            chatLog += resultJson
+            if (options.logToConsole) console.log(resultJson)
+
+            const separator = '=======================\n\n'
+            chatLog += separator
+            if (options.logToConsole) console.log(separator)
           }
         }
       },
       (chunk) => {
         // Append text chunks to chatLog instead of streaming to console
         chatLog += chunk
+        if (options.logToConsole) process.stdout.write(chunk)
       },
       tools, // Pass the MCP tools to the agent loop
     )
     chatLog += '\n' // Add a newline after completion
+    if (options.logToConsole) console.log('\n')
 
     const synthesis = await generateText({
       model: google('gemini-2.0-flash'),
@@ -68,6 +89,7 @@ export async function runSdrAgent(prompt: string): Promise<SDRAgentResult> {
     return { chatLog, synthesis: synthesis.text }
   } catch (error) {
     chatLog += `Error running SDR agent: ${error}\n`
+    if (options.logToConsole) console.error(`Error running SDR agent: ${error}`)
     throw error
   }
 }
@@ -83,7 +105,9 @@ export async function runSdrAgentOnEachCompany(
   const results = []
 
   for (const company of companies) {
-    const result = await runSdrAgent(`\n\nCompany: ${company}\n\nTask: ${task}`)
+    const result = await runSdrAgent(`\n\nCompany: ${company}\n\nTask: ${task}`, {
+      logToConsole: true,
+    })
     results.push({ ...result, company })
   }
 

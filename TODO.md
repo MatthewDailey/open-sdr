@@ -59,6 +59,7 @@ company_background(company or tool name) -> deep research + structured extract
   - spawn a sub-agent per company with a command and then aggregates the results
 [] test everything
 [] connect a golden path workflow
+
 [] niceties
   [] open message link to person?
   [] update mcp config to allow including only sepecific tools for other servers

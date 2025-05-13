@@ -31,7 +31,7 @@ yargs(hideBin(process.argv))
     async (argv) => {
       const promptFilePath = argv.promptFilePath as string
       const prompt = fs.readFileSync(promptFilePath, 'utf8')
-      await runSdrAgent(prompt)
+      await runSdrAgent(prompt, { logToConsole: true })
     },
   )
   .command('server', 'Start the MCP server', {}, async () => {
