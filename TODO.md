@@ -78,7 +78,7 @@ company_background(company or tool name) -> deep research + structured extract
   [x] delete the hackathon web app
   [x] move my prompts to sample prompt area
   [x] unify tool definitions (try result: string from MCP ones with claude)
-  [] fix `npm warn` issues on install
+  [x] fix `npm warn` issues on install
 [] login cli should have nicer messaging (eg you're now logged in)
   - hit enter to open linkedin in a browser to login, this is th browser that open-sdr will use. 
   - when done, close the browser

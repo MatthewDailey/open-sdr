@@ -36,7 +36,9 @@
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^4.19.2",
+    "glob": "^10.3.10",
     "js-yaml": "^4.1.0",
+    "lru-cache": "^10.2.0",
     "puppeteer": "^24.8.0",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2",
@@ -44,6 +46,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-markdown": "^10.1.0",
+    "rimraf": "^5.0.5",
     "styled-jsx": "^5.1.2",
     "typescript": "^5.7.2",
     "vitest": "^3.0.9",
@@ -66,5 +69,10 @@
     "supertest": "^7.0.0",
     "tsx": "^4.19.2",
     "vite": "^6.0.7"
+  },
+  "overrides": {
+    "rimraf": "^5.0.5",
+    "glob": "^10.3.10",
+    "inflight": "^2.0.0"
   }
 }
