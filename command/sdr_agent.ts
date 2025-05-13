@@ -6,6 +6,8 @@
 import chalk from 'chalk'
 import { doAgentLoop } from './agent'
 import { startClientAndGetTools } from './mcp'
+import { GoogleAI } from './google'
+import { z } from 'zod'
 
 /**
  * Runs the SDR agent with the provided prompt
@@ -48,5 +50,40 @@ export async function runSdrAgent(prompt: string): Promise<void> {
   } catch (error) {
     console.error(chalk.red('Error running SDR agent:'), error)
     process.exit(1)
+  }
+}
+
+export async function runSdrAgentOnEachCompany(prompt: string) {
+  const { companies, task } = await getCompaniesAndTask(prompt)
+  for (const company of companies) {
+    await runSdrAgent(`\n\nCompany: ${company}\n\nTask: ${task}`)
+  }
+}
+
+async function getCompaniesAndTask(prompt: string): Promise<{ companies: string[]; task: string }> {
+  try {
+    // Create a new instance of GoogleAI
+    const googleAI = new GoogleAI()
+
+    // Define the schema for extracting companies and task
+    const schema = z.object({
+      companies: z.array(z.string().min(1)).min(1),
+      task: z.string().min(1),
+    })
+
+    // Extract companies and task from the prompt
+    const result = await googleAI.generateStructuredData(
+      `Extract the list of companies and the main task from the following prompt. Make the task as specific as possible.
+      If no companies are explicitly mentioned, return an empty array.
+      
+      Prompt: ${prompt}`,
+      schema,
+    )
+
+    return result
+  } catch (error) {
+    console.error('Error extracting companies and task:', error)
+    // Return empty defaults in case of error
+    return { companies: [], task: '' }
   }
 }
