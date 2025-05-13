@@ -13,6 +13,7 @@ puppeteer.use(StealthPlugin())
 
 import { z } from 'zod'
 import { GoogleAI } from './google.js'
+import chalk from 'chalk'
 
 export const ProfileSchema = z.object({
   name: z.string(),
@@ -38,6 +39,15 @@ export class LinkedIn {
    * Saves cookies when the browser is closed by the user
    */
   async login(): Promise<void> {
+    if (!fs.existsSync(this.cookiesPath)) {
+      console.log(
+        chalk.yellow(
+          'A browser will open to LinkedIn, please sign in. This is the browser OpenSDR will use to access LinkedIn.\n\nPress [Enter] to proceed.',
+        ),
+      )
+      await new Promise((resolve) => process.stdin.once('data', resolve))
+    }
+
     // Launch a headed browser
     const browser = await puppeteer.launch({
       headless: false,
@@ -62,18 +72,24 @@ export class LinkedIn {
 
       await page.goto('https://www.linkedin.com/login', { waitUntil: 'networkidle2' })
 
-      console.log('Please log in to LinkedIn. The browser will stay open until you close it.')
-
       let cookies: Cookie[] = []
-      setInterval(async () => {
+      const interval = setInterval(async () => {
         cookies = await page.cookies()
         if (cookies.length > 0) {
-          console.log('Cookies updated...')
           fs.writeFileSync(this.cookiesPath, JSON.stringify(cookies, null, 2))
         }
       }, 5000)
 
-      await browser.waitForTarget((target) => target.opener() === null, { timeout: 0 })
+      await page.waitForFunction(
+        () => window.location.href.includes('https://www.linkedin.com/feed/'),
+        { timeout: 0 }, // No timeout - wait indefinitely until user logs in and reaches feed
+      )
+      console.log(chalk.green('✔︎ Successfully logged in'))
+
+      await new Promise((resolve) => setTimeout(resolve, 3000))
+      clearInterval(interval)
+      await browser.close()
+      process.exit(0)
     } catch (error: any) {
       if (!error?.message?.includes('Navigating frame was detached')) {
         console.error('Error during LinkedIn login:', error)
