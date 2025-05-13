@@ -396,7 +396,7 @@ export class SDR {
         }),
         execute: async ({ companyName, degree }) => {
           const profiles = await this.findConnectionsAtCompany(companyName, degree)
-          return profiles.data
+          return profiles.text
         },
       }),
 
@@ -408,7 +408,7 @@ export class SDR {
         }),
         execute: async ({ personName, companyName }) => {
           const profile = await this.findProfile(personName, companyName)
-          return profile.data
+          return profile.text
         },
       }),
 
@@ -423,7 +423,7 @@ export class SDR {
         }),
         execute: async ({ personName, companyName }) => {
           const connections = await this.findMutualConnections(personName, companyName)
-          return connections.data
+          return connections.text
         },
       }),
 
@@ -449,7 +449,7 @@ export class SDR {
             companyContext,
             peopleGuidance,
           })
-          return companyData.data
+          return companyData.text
         },
       }),
 
@@ -467,7 +467,7 @@ export class SDR {
             timeLimit,
             maxUrls,
           })
-          return researchData.data
+          return researchData.text
         },
       }),
 
@@ -479,7 +479,7 @@ export class SDR {
         }),
         execute: async ({ prompt }) => {
           const result = await this.runAgentOnEachCompany(prompt)
-          return result.data
+          return result.text
         },
       }),
 
@@ -499,7 +499,7 @@ export class SDR {
         }),
         execute: async ({ content, filename, subdirectory }) => {
           const result = await writeMarkdown(content, { filename, subdirectory })
-          return { filePath: result.filePath }
+          return `Successfully wrote markdown to file: ${result.filePath}`
         },
       }),
     }

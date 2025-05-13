@@ -58,8 +58,9 @@ company_background(company or tool name) -> deep research + structured extract
 [x] loop over companies tool to ensure we hit every one 
   - spawn a sub-agent per company with a command and then aggregates the results
 [x] test everything
-[] no remote server for cli agent
-[] connect a golden path workflow
+[x] no remote server for cli agent
+[x] connect a golden path workflow
+[] try running it on a larger suite
 
 [] niceties
   [] open message link to person?

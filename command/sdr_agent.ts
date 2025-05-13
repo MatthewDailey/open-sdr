@@ -78,7 +78,7 @@ export async function runSdrAgent(
 
     const synthesis = await generateText({
       model: google('gemini-2.0-flash'),
-      prompt: `Synthesize the chat log into a concise summary. Make sure to include all details, especially links.
+      prompt: `Synthesize the chat log into a concise summary. Make sure to include all key findings, every detail and especially urls and links.
       Chat log: ${chatLog}`,
     })
 
