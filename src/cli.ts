@@ -17,8 +17,6 @@ import { runSdrAgent } from './sdr_agent.js'
 if (fs.existsSync('.env')) {
   console.log('Loading environment variables from .env file')
   dotenv.config({ override: true })
-} else {
-  console.log('No .env file found')
 }
 
 yargs(hideBin(process.argv))

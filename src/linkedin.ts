@@ -94,7 +94,14 @@ export class LinkedIn {
     const networkParam = degree === 'first' ? 'F' : 'S'
     const searchUrl = `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(companyName)}&network=["${networkParam}"]`
     const screenshotName = `${companyName.replace(/\s+/g, '_')}_connections`
-    return this.extractProfilesFromLinkedin(searchUrl, screenshotName)
+    const profiles = await this.extractProfilesFromLinkedin(
+      searchUrl,
+      screenshotName,
+      `VERY IMPORTANT: Only include profiles of people that work at the company '${companyName}' and be sure this is correct, ignore other profiles.`,
+    )
+    return profiles.filter((profile) =>
+      profile.company.toLowerCase().includes(companyName.toLowerCase()),
+    )
   }
 
   /**
@@ -221,9 +228,22 @@ export class LinkedIn {
     return { mutuals: [], person }
   }
 
-  private async extractProfilesFromLinkedin(url: string, name: string): Promise<Profile[]> {
+  private async extractProfilesFromLinkedin(
+    url: string,
+    name: string,
+    additionalInstructions: string = '',
+  ): Promise<Profile[]> {
     return await this.withLinkedin(url, async (page) => {
       const screenshotPath = path.join(process.cwd(), 'search_screenshots', `${name}.png`)
+
+      // Remove summary elements that include a bunch of random text that can confuse the LLM
+      await page.evaluate(() => {
+        const summaryElements = document.querySelectorAll(
+          'p[class*="entity-result__summary--2-lines"]',
+        )
+        summaryElements.forEach((el) => el.remove())
+      })
+
       await page.screenshot({
         path: screenshotPath,
         fullPage: true,
@@ -242,11 +262,30 @@ export class LinkedIn {
           })
           return results
         })
-      ).map(cleanUrlQueryParams)
+      )
+        .map(cleanUrlQueryParams)
+        .filter((url) => {
+          // Filter out URLs with final slug >38 characters and containing numbers
+          // Extract the slug (the part after /in/)
+          const match = url.match(/linkedin\.com\/in\/([\w-]+)/)
+          if (!match) return false
 
-      const google = new GoogleAI()
+          const slug = match[1]
+
+          // Check if slug is >38 characters and contains numbers
+          if (slug.length > 38 && /\d/.test(slug)) {
+            return false
+          }
+
+          return true
+        })
+
+      // const google = new GoogleAI('gemini-2.5-pro-preview-05-06')
+      const google = new GoogleAI('gemini-2.0-flash')
       const profiles = await google.generateStructuredData(
-        'Here is a screenshot of a LinkedIn search results page and some urls that appear on that page. Match the urls to the profiles in the screenshot. Return a list of profiles with the following fields: name, role, company, profileUrl. If a url does not match any profile in the screenshot, do not include it in the list. The role is typically on the line in line "Current: <role> at <company>", only include the role. \n\n' +
+        `Here is a screenshot of a LinkedIn search results page and some urls that appear on that page. Match the urls to the profiles in the screenshot. Return a list of profiles with the following fields: name, role, company, profileUrl. If no profiles are found, return an empty list.` +
+          additionalInstructions +
+          '\n\n' +
           profileUrls.join('\n'),
         z.array(ProfileSchema),
         screenshotPath,

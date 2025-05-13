@@ -27,8 +27,8 @@ type MessageContent = string | (TextPart | ImagePart)[]
 export class GoogleAI {
   private apiKey: string
 
-  constructor(apiKey?: string) {
-    this.apiKey = apiKey || process.env.GOOGLE_GENERATIVE_AI_API_KEY || ''
+  constructor(private model: string = 'gemini-2.0-flash') {
+    this.apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY || ''
     if (!this.apiKey) {
       throw new Error(
         'Google Generative AI API key is required. Set it in the constructor or as GOOGLE_GENERATIVE_AI_API_KEY environment variable.',
@@ -71,7 +71,7 @@ export class GoogleAI {
       }
 
       const result = await generateObject({
-        model: google('gemini-2.0-flash'),
+        model: google(this.model),
         schema,
         messages: [
           {

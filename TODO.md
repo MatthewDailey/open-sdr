@@ -69,9 +69,10 @@ company_background(company or tool name) -> deep research + structured extract
 [] try running it on a larger suite
 [x] messaging workflow - given a profile, open message link to person? (have puppeteer open a dom node including background on this person)
   - aria-label message
+[] search often finds people that do not work at the company 
+  - add a verify step for each person? or use the screenshot?
 [] make message more stable than using name
 [] make message not die if no message
-[] search often finds people that do not work at the company - should make it better at this
 
 [] publishing
   [x] read env from .env (implemented, validate this)
