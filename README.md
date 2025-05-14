@@ -143,6 +143,10 @@ This will output an MCP config JSON object you can use to configure an MCP clien
 
 [Claude Desktop](https://modelcontextprotocol.io/quickstart/user) is a great MCP client to get started with. This will allow you to make requests of OpenSDR like any other LLM tool without using the terminal.
 
+## Note taking
+
+By default OpenSDR will takes notes to a sub-directory `./sdr_notes` from whereever you run it. You can prompt it not to take notes of course.
+
 ## How does it work?
 
 OpenSDR accesses Linkedin using [Puppeteer](https://pptr.dev/) to manage a browser that the user logs into.
