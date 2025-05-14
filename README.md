@@ -38,8 +38,6 @@ OpenSDR can be used in 2 ways:
 
 All of the tools OpenSDR agent has are available via `sdr tools <command>`. You can provide these tools to another MCP client using `sdr server`.
 
-#### Tool Details
-
 **findLinkedinConnectionsAt**: Find first or second-degree connections at a specific company
   ```
   sdr tools findLinkedinConnectionsAt --companyName="Company Name" --degree="first|second"

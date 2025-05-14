@@ -22,9 +22,7 @@ company_background(company or tool name) -> deep research + structured extract
 - people: [{name, url, }]
 
 
-
 # TODO
-
 [x] clean up hackathon stuff
 [x] try firecrawl deep research
   [x] add a new cli command to
@@ -86,7 +84,7 @@ company_background(company or tool name) -> deep research + structured extract
   - when done, close the browser
   - Done! you can run login again to open linkedin and verify open-sdr is logged in.
   
-[] README with 
+[x] README with 
 - /images/opensdr-logomark-vector.png
 - description of what SDRs do: research and find people on linkedin
 - get started 
@@ -106,13 +104,10 @@ company_background(company or tool name) -> deep research + structured extract
     - slack to share briefings
 - Built with ref.tools
 - License MPL 2.0
+[x] generate landing page (simpleanalytics) and figma sites! (link to ref at bottom)
+[x] list of tools provided (visual between these?)
+[x] landing page og: tags that work
+[x] visual agent architecture about spawning sub agents per company
 
 [] client demo video 
 [] server demo video - in claude show the tools,  "find everyone i'm connected to at Anysphere and draft a message to them each saying I want to talk about Cursor"
-
-[] generate landing page (simpleanalytics) and figma sites! (link to ref at bottom)
-[] list of tools provided (visual between these?)
-[] landing page og: tags that work
-[] note about test browser
-[] visual agent architecture about spawning sub agents per company
-[] "help! this seems useful but what is MCP?"
