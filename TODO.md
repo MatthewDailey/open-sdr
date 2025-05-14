@@ -109,5 +109,7 @@ company_background(company or tool name) -> deep research + structured extract
 [x] landing page og: tags that work
 [x] visual agent architecture about spawning sub agents per company
 
-[] client demo video 
+[] agent demo video - re-run the whole process, tune in part way to explain what it's doing
 [] server demo video - in claude show the tools,  "find everyone i'm connected to at Anysphere and draft a message to them each saying I want to talk about Cursor"
+[x] try figma prompt to design?
+[x] add ref tag

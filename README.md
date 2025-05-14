@@ -4,33 +4,48 @@
 
 OpenSDR helps you research companies and find people on LinkedIn, automating the tedious aspects of lead generation.
 
-
 ## Getting Started
 
-1. **Install Open-SDR:**
-   ```
-   npm install -g open-sdr
-   ```
+OpenSDR is a commandline tool you'll run from Terminal and you need to install it with `npm`. 
 
-2. **Login to LinkedIn:**
-   ```
-   sdr login
-   ```
-   This will open LinkedIn in a browser for you to login. Open-SDR will use this browser session for its operations.
+**0.  Dependencies**
+
+In a Terminal, run:
+```
+npm -v
+```
+If this prints a number like `10.8.2`, you're good to go! If not, you need to [download and install Node.js](https://nodejs.org/en/download)
+
+
+**1. Install OpenSDR**
+```
+npm install -g open-sdr
+```
+
+**2. Login to LinkedIn**
+```
+sdr login
+```
+This will open LinkedIn in a browser for you to login. Open-SDR will use this browser session for its operations.
 
 3. **Set up API keys:**
    Create a `.env` file with your API keys:
 ```
-FIRECRAWL_API_KEY=<your key>
-GOOGLE_GENERATIVE_AI_API_KEY=<your key>
-ANTHROPIC_API_KEY=<your key>
-RIME_API_KEY=<> (optional, disable in mcp.ts)
+FIRECRAWL_API_KEY=<your key>            (for research)
+GOOGLE_GENERATIVE_AI_API_KEY=<your key> (for processing and scraping)
+ANTHROPIC_API_KEY=<your key>            (for the primary agent loop)
+RIME_API_KEY=<>                         (for TTS to notify of progress, optional, disable in mcp.ts)
 ```
+
+- [Get a Firecrawl API Key](https://docs.firecrawl.dev/introduction)
+- [Get a Google AI API Key](https://ai.google.dev/gemini-api/docs/api-key)
+- [Get an Anthropic API Key](https://docs.anthropic.com/en/api/getting-started)
+- [Get a Rime API key](https://www.rime.ai/)
 
 ## How to use OpenSDR
 
 OpenSDR can be used in 2 ways:
-- `sdr agent` - A stand-alone agent via commandline interface (CLI) that is an MCP client. You provide the agent a task like researching a list of companies and it gets to work.
+- `sdr agent <promptFilePath>` - A stand-alone agent via commandline interface (CLI) that is an MCP client. You provide the agent a task like researching a list of companies and it gets to work.
 - `sdr server` - An MCP server that gives tools for research and lead generation to other MCP clients like Claude Desktop.
 
 
@@ -121,7 +136,9 @@ To start the server:
 sdr server
 ```
 
-This will output an MCP config JSON object you can use to configure an MCP client.
+This will output an MCP config JSON object you can use to configure an MCP client. 
+
+[Claude Desktop](https://modelcontextprotocol.io/quickstart/user) is a great MCP client to get started with. This will allow you to make requests of OpenSDR like any other LLM tool without using the terminal.
 
 ## How does it work?
 
