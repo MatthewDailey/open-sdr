@@ -1,6 +1,6 @@
 
 
-<img src="images/opensdr-logomark-vector.png" alt="Open-SDR Logo" width="500"/>
+<img src="images/opensdr-wordmark.png" alt="Open-SDR Logo" width="500"/>
 
 OpenSDR helps you research companies and find people on LinkedIn, automating the tedious aspects of lead generation.
 

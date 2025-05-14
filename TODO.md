@@ -115,3 +115,4 @@ company_background(company or tool name) -> deep research + structured extract
 [] landing page og: tags that work
 [] note about test browser
 [] visual agent architecture about spawning sub agents per company
+[] "help! this seems useful but what is MCP?"
