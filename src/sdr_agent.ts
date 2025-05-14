@@ -5,12 +5,12 @@
 
 import { google } from '@ai-sdk/google'
 import { generateText } from 'ai'
+import chalk from 'chalk'
 import { z } from 'zod'
 import { doAgentLoop } from './agent.js'
 import { GoogleAI } from './google.js'
-import { OpenSdrMode, startClientAndGetTools } from './mcp.js'
+import { startClientAndGetTools } from './mcp.js'
 import { SDR } from './sdr.js'
-import chalk from 'chalk'
 
 export type SDRAgentResult = {
   chatLog: string
@@ -31,7 +31,7 @@ export async function runSdrAgent(
   let chatLog = ''
 
   try {
-    const { tools } = await startClientAndGetTools(OpenSdrMode.LOCAL)
+    const { tools } = await startClientAndGetTools()
 
     const sdrTools = await new SDR().getTools()
     Object.assign(tools, sdrTools)

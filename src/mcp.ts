@@ -6,63 +6,25 @@ import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 import { experimental_createMCPClient, type Tool } from 'ai'
 
 const mcpCommands: { name: string; command: string[]; env?: Record<string, string> }[] = [
-  ////////////////////////////////
-  // Used for the hackathon.
-  // {
-  //   name: 'perplexity',
-  //   command: ['npx', '-y', 'server-perplexity-ask'],
-  // },
-  // {
-  //   name: 'notion',
-  //   command: ['npx', '-y', '@notionhq/notion-mcp-server'],
-  // },
-  // {
-  //   name: 'ref-tools',
-  //   command: ['npx', '-y', 'ref-tools-mcp'],
-  // },
-  // {
-  //   name: 'firecrawl',
-  //   command: ['npx', '-y', 'firecrawl-mcp'],
-  // },
-  ////////////////////////////////
   {
     name: 'rime',
     command: ['npx', '-y', 'rime-mcp'],
   },
-  {
-    name: 'open-sdr',
-    command: ['npx', '-y', 'mcp-remote@0.1.0-0', 'http://localhost:3000/mcp'],
-  },
-  // {
-  //   name: 'ref-tools',
-  //   command: ['npx', '-y', 'ref-tools-mcp'],
-  //   env: { REF_ALPHA: 'open-sdr-ref-matt' },
-  // },
+  // Add more MCP server commands here.
 ]
-
-export enum OpenSdrMode {
-  REMOTE = 'remote',
-  LOCAL = 'local',
-}
 
 /**
  * Starts MCP clients for the predefined commands and returns the clients and their tools.
  *
  * @returns A promise that resolves to an object containing the MCP clients and their tools.
  */
-export async function startClientAndGetTools(
-  openSdrMode: OpenSdrMode = OpenSdrMode.REMOTE,
-): Promise<{
+export async function startClientAndGetTools(): Promise<{
   tools: Record<string, Tool>
 }> {
   const allTools: Record<string, Tool> = {}
 
   // Create a client for each MCP command
   for (const { name, command, env } of mcpCommands) {
-    if (name === 'open-sdr' && openSdrMode !== OpenSdrMode.REMOTE) {
-      continue
-    }
-
     const baseEnv = { ...process.env, NODE_ENV: 'development' }
 
     // Create a client with the appropriate transport
