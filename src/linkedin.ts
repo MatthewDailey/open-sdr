@@ -3,13 +3,15 @@
  */
 
 import { Browser, Page, type Cookie } from 'puppeteer'
-import puppeteer from 'puppeteer-extra'
-import StealthPlugin from 'puppeteer-extra-plugin-stealth'
 import fs from 'fs'
 import path from 'path'
 import { cleanUrlQueryParams } from './url.js'
 
-puppeteer.use(StealthPlugin())
+import puppeteer from 'puppeteer'
+// Stealth pluging should not be required but here's the code. `npm install puppeteer-extra puppeteer-extra-plugin-stealth`
+// import puppeteer from 'puppeteer-extra'
+// import StealthPlugin from 'puppeteer-extra-plugin-stealth'
+// puppeteer.use(StealthPlugin())
 
 import { z } from 'zod'
 import { GoogleAI } from './google.js'

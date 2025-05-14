@@ -1,7 +1,7 @@
 {
   "name": "open-sdr",
   "type": "module",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "bin": {
     "sdr": "./dist/src/cli.js"
   },
@@ -32,8 +32,6 @@
     "express": "^4.19.2",
     "glob": "^10.3.10",
     "puppeteer": "^24.8.0",
-    "puppeteer-extra": "^3.3.6",
-    "puppeteer-extra-plugin-stealth": "^2.11.2",
     "rimraf": "^5.0.5",
     "typescript": "^5.7.2",
     "vitest": "^3.0.9",
