@@ -145,7 +145,7 @@ This will output an MCP config JSON object you can use to configure an MCP clien
 
 ## How does it work?
 
-OpenSDR accesses Linkedin using [Puppeteer](https://pptr.dev/) to manage a browser that the user logg
+OpenSDR accesses Linkedin using [Puppeteer](https://pptr.dev/) to manage a browser that the user logs into.
 
 Research capabilities are provided by [Firecrawl](https://www.firecrawl.dev/)
 
