@@ -255,7 +255,10 @@ export class LinkedIn {
   ): Promise<Profile[]> {
     return (
       (await this.withLinkedin(url, async (page) => {
-        const screenshotPath = path.join(process.cwd(), 'search_screenshots', `${name}.png`)
+        // Create search_screenshots directory if it doesn't exist
+        const screenshotsDir = path.join(process.cwd(), 'search_screenshots')
+        await fs.promises.mkdir(screenshotsDir, { recursive: true })
+        const screenshotPath = path.join(screenshotsDir, `${name}.png`)
 
         // Remove summary elements that include a bunch of random text that can confuse the LLM
         await page.evaluate(() => {
