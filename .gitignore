@@ -4,5 +4,5 @@ node_modules
 linkedin-cookies.json
 research_results.json
 queries
-sdr_notes
+sdr_notes*
 .env
