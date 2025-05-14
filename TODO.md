@@ -73,35 +73,45 @@ company_background(company or tool name) -> deep research + structured extract
 [x] make message more stable than using name (ex jay)
 [x] make message not die if no message
 
-[] publishing
+[x] publishing
   [x] read env from .env (implemented, validate this)
   [x] add binary for global install
   [x] delete the hackathon web app
   [x] move my prompts to sample prompt area
   [x] unify tool definitions (try result: string from MCP ones with claude)
   [x] fix `npm warn` issues on install
-[] login cli should have nicer messaging (eg you're now logged in)
+  [] factor out MCP config
+[x] login cli should have nicer messaging (eg you're now logged in)
   - hit enter to open linkedin in a browser to login, this is th browser that open-sdr will use. 
   - when done, close the browser
   - Done! you can run login again to open linkedin and verify open-sdr is logged in.
   
 [] README with 
+- /images/opensdr-logomark-vector.png
+- description of what SDRs do: research and find people on linkedin
+- get started 
+  - login
+  - firecrawl, gemini, anthropic api keys
+- CLI tools
+  - tool list
+  - agetn architeture images/agent-arch.png
+- MCP server
+  -- instructions
+- MCP client 
+  -- rime example
+  -- untested MCP ideas i'm sure you could make work: 
+    - google sheets (company, person, warm intro) -> test via claude integration
+    - try adding an email enrichment service -> apollo
+    - try adding store to notion (after allowing filter tools)
+    - slack to share briefings
+- Built with ref.tools
+- License MPL 2.0
+
+[] client demo video 
+[] server demo video - in claude show the tools,  "find everyone i'm connected to at Anysphere and draft a message to them each saying I want to talk about Cursor"
+
 [] generate landing page (simpleanalytics) and figma sites! (link to ref at bottom)
-content:
-[] description of SDRs job
-[] setup steps: firecrawl, gemini, anthropic api keys
-[] client demo video
-[] MCP ideas (mark untest)
-  - rime voice to announce (tested)
-  - google sheets (company, person, warm intro) -> test via claude integration
-  - try adding an email enrichment service -> apollo
-  - try adding store to notion (after allowing filter tools)
-  - slack to share briefings
-[] server demo video
 [] list of tools provided (visual between these?)
 [] landing page og: tags that work
 [] note about test browser
 [] visual agent architecture about spawning sub agents per company
-
-stretch
-[] chat UX for `sdr agent`
