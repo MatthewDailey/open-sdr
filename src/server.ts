@@ -19,10 +19,10 @@ export async function createMcpApp() {
   )
   app.use(express.json())
 
-  app.all('/mcp', async (req, res) => {
-    const sdr = new SDR()
-    const server = await sdr.startMcpServer()
+  const sdr = new SDR()
+  const server = await sdr.startMcpServer()
 
+  app.all('/mcp', async (req, res) => {
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: undefined, // disables session management
     })

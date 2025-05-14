@@ -125,8 +125,6 @@ export async function gatherCompanyBackground(
     .map((source, i) => `[${i + 1}] ${source.title}: ${source.url}`)
     .join('\n')
 
-  const googleAI = new GoogleAI(googleApiKey)
-
   // Add people guidance to the structuring prompt if provided
   let peopleGuidanceInfo = ''
   if (peopleGuidance) {
@@ -148,7 +146,7 @@ export async function gatherCompanyBackground(
   `
 
   try {
-    const companyData = await googleAI.generateStructuredData(
+    const companyData = await new GoogleAI().generateStructuredData(
       structuringPrompt,
       CompanyBackgroundSchema,
     )
