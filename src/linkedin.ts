@@ -261,12 +261,13 @@ export class LinkedIn {
         const screenshotPath = path.join(screenshotsDir, `${name}.png`)
 
         // Remove summary elements that include a bunch of random text that can confuse the LLM
-        await page.evaluate(() => {
-          const summaryElements = document.querySelectorAll(
-            'p[class*="entity-result__summary--2-lines"]',
-          )
-          summaryElements.forEach((el) => el.remove())
-        })
+        // This can help for companies with common names but a lot of people do not include their company name in their header.
+        // await page.evaluate(() => {
+        //   const summaryElements = document.querySelectorAll(
+        //     'p[class*="entity-result__summary--2-lines"]',
+        //   )
+        //   summaryElements.forEach((el) => el.remove())
+        // })
 
         await page.screenshot({
           path: screenshotPath,

@@ -1,7 +1,7 @@
 {
   "name": "open-sdr",
   "type": "module",
-  "version": "0.2.0",
+  "version": "0.5.0",
   "bin": {
     "sdr": "./dist/src/cli.js"
   },
