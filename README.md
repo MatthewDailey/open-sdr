@@ -8,6 +8,8 @@ OpenSDR helps you research companies and find people on LinkedIn, automating the
 
 OpenSDR is a commandline tool you'll run from Terminal and you need to install it with `npm`. 
 
+Note: these instructions are for Mac OSX. OpenSDR should work on non-Mac systems but you'll need to adapt the instructions.
+
 **0.  Dependencies**
 
 In a Terminal, run:
@@ -28,8 +30,9 @@ sdr login
 ```
 This will open LinkedIn in a browser for you to login. Open-SDR will use this browser session for its operations.
 
-3. **Set up API keys:**
-   Create a `.env` file with your API keys:
+**3. Set up API keys:**
+   
+Create a `.env` file with your API keys and run `sdr` in the same directory. In Terminal `cd ~` will move you to your home directory, something like `/Users/matt`.
 ```
 FIRECRAWL_API_KEY=<your key>            (for research)
 GOOGLE_GENERATIVE_AI_API_KEY=<your key> (for processing and scraping)
