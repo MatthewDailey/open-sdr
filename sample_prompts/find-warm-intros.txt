@@ -37,6 +37,8 @@ V0 by Vercel (UI Generation) https://v0.dev/
 Void (Code Editor) https://github.com/voideditor/void
 Zed (Development Environment) https://zed.dev/
 
+I am building a tool that helps coding agents find and read documentation. I need your help finding leads to talk to at agent development companies. 
+
 Your task is to:
 1. Verify if this is a tool or a company. If it is a tool, find the company name. This is very important so we can find all the correct background and connections
 2. Gather background on the company.

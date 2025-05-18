@@ -4,6 +4,8 @@
 
 OpenSDR helps you research companies and find people on LinkedIn, automating the tedious aspects of lead generation.
 
+> What if Claude Code went into sales instead?
+
 ## Getting Started
 
 OpenSDR is a commandline tool you'll run from Terminal and you need to install it with `npm`. 
